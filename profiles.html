@@ -1,63 +1,115 @@
 <style>
   .search-bar {
-    margin-bottom: 20px;
+    width: 50%;
+    padding: 10px 15px;
+    margin: 20px auto;
+    display: block;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
+
   .card-container {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
+    padding: 10px;
   }
+
   .card {
-    border: 1px solid #ccc;
-    border-radius: 10px;
+    border: 1px solid #eee;
+    border-radius: 12px;
     padding: 15px;
-    width: 250px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 260px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+    text-align: center;
   }
+
   .card img {
-    width: 100%;
-    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 10px;
   }
-  .card h3, .card p {
-    margin: 5px 0;
+
+  .card h3 {
+    margin: 10px 0 5px;
+  }
+
+  .card p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #444;
   }
 </style>
 
-<input class="search-bar" type="text" id="search" placeholder="Buscar por nombre, cargo, herramientas..." onkeyup="filterCards()"/>
+<input class="search-bar" type="text" id="search" placeholder="🔍 Buscar por nombre, cargo o herramientas..." onkeyup="filterCards()"/>
 
-<div class="card-container" id="cards">
-  <div class="card" data-name="Jane Doe" data-cargo="Software Engineer" data-tools="Python JavaScript">
-    <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Jane">
-    <h3>Jane Doe</h3>
-    <p><strong>Cargo:</strong> Software Engineer</p>
-    <p><strong>Herramientas:</strong> Python, JavaScript</p>
-    <p><strong>País:</strong> 🇺🇸 USA</p>
-    <p><strong>Correo:</strong> jane.doe@example.com</p>
-    <p><strong>Líder:</strong> Mark White</p>
-  </div>
-  <div class="card" data-name="John Smith" data-cargo="Product Manager" data-tools="Agile JIRA">
-    <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="John">
-    <h3>John Smith</h3>
-    <p><strong>Cargo:</strong> Product Manager</p>
-    <p><strong>Herramientas:</strong> Agile, JIRA</p>
-    <p><strong>País:</strong> 🇬🇧 UK</p>
-    <p><strong>Correo:</strong> john.smith@example.com</p>
-    <p><strong>Líder:</strong> Mark White</p>
-  </div>
-  <!-- Agrega más tarjetas aquí -->
-</div>
+<div class="card-container" id="cards"></div>
 
 <script>
-  function filterCards() {
-    const input = document.getElementById('search').value.toLowerCase();
-    const cards = document.querySelectorAll('.card');
+  const personas = [
+    {
+      nombre: "Jane Doe",
+      cargo: "Software Engineer",
+      herramientas: ["Python", "JavaScript"],
+      pais: "🇺🇸 USA",
+      correo: "jane.doe@example.com",
+      lider: "Mark White",
+      foto: "https://randomuser.me/api/portraits/women/1.jpg"
+    },
+    {
+      nombre: "John Smith",
+      cargo: "Product Manager",
+      herramientas: ["Agile", "JIRA"],
+      pais: "🇬🇧 UK",
+      correo: "john.smith@example.com",
+      lider: "Mark White",
+      foto: "https://randomuser.me/api/portraits/men/2.jpg"
+    },
+    {
+      nombre: "Carla Rodríguez",
+      cargo: "UX Designer",
+      herramientas: ["Figma", "Sketch"],
+      pais: "🇲🇽 México",
+      correo: "carla.rodriguez@example.com",
+      lider: "Sarah Brown",
+      foto: "https://randomuser.me/api/portraits/women/3.jpg"
+    }
+    // Puedes agregar más personas aquí o cargar desde un archivo JSON externo
+  ];
 
-    cards.forEach(card => {
-      const name = card.dataset.name.toLowerCase();
-      const cargo = card.dataset.cargo.toLowerCase();
-      const tools = card.dataset.tools.toLowerCase();
-      const match = name.includes(input) || cargo.includes(input) || tools.includes(input);
-      card.style.display = match ? 'block' : 'none';
+  function renderCards(data) {
+    const container = document.getElementById('cards');
+    container.innerHTML = "";
+    data.forEach(p => {
+      container.innerHTML += `
+        <div class="card">
+          <img src="${p.foto}" alt="${p.nombre}">
+          <h3>${p.nombre}</h3>
+          <p><strong>Cargo:</strong> ${p.cargo}</p>
+          <p><strong>Herramientas:</strong> ${p.herramientas.join(', ')}</p>
+          <p><strong>País:</strong> ${p.pais}</p>
+          <p><strong>Correo:</strong> ${p.correo}</p>
+          <p><strong>Líder:</strong> ${p.lider}</p>
+        </div>`;
     });
   }
+
+  function filterCards() {
+    const input = document.getElementById('search').value.toLowerCase();
+    const filtered = personas.filter(p =>
+      p.nombre.toLowerCase().includes(input) ||
+      p.cargo.toLowerCase().includes(input) ||
+      p.herramientas.join(', ').toLowerCase().includes(input)
+    );
+    renderCards(filtered);
+  }
+
+  // Render inicial
+  renderCards(personas);
 </script>
