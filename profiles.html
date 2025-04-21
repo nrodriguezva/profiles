@@ -1,0 +1,63 @@
+<style>
+  .search-bar {
+    margin-bottom: 20px;
+  }
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 15px;
+    width: 250px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .card img {
+    width: 100%;
+    border-radius: 8px;
+  }
+  .card h3, .card p {
+    margin: 5px 0;
+  }
+</style>
+
+<input class="search-bar" type="text" id="search" placeholder="Buscar por nombre, cargo, herramientas..." onkeyup="filterCards()"/>
+
+<div class="card-container" id="cards">
+  <div class="card" data-name="Jane Doe" data-cargo="Software Engineer" data-tools="Python JavaScript">
+    <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Jane">
+    <h3>Jane Doe</h3>
+    <p><strong>Cargo:</strong> Software Engineer</p>
+    <p><strong>Herramientas:</strong> Python, JavaScript</p>
+    <p><strong>País:</strong> 🇺🇸 USA</p>
+    <p><strong>Correo:</strong> jane.doe@example.com</p>
+    <p><strong>Líder:</strong> Mark White</p>
+  </div>
+  <div class="card" data-name="John Smith" data-cargo="Product Manager" data-tools="Agile JIRA">
+    <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="John">
+    <h3>John Smith</h3>
+    <p><strong>Cargo:</strong> Product Manager</p>
+    <p><strong>Herramientas:</strong> Agile, JIRA</p>
+    <p><strong>País:</strong> 🇬🇧 UK</p>
+    <p><strong>Correo:</strong> john.smith@example.com</p>
+    <p><strong>Líder:</strong> Mark White</p>
+  </div>
+  <!-- Agrega más tarjetas aquí -->
+</div>
+
+<script>
+  function filterCards() {
+    const input = document.getElementById('search').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+      const name = card.dataset.name.toLowerCase();
+      const cargo = card.dataset.cargo.toLowerCase();
+      const tools = card.dataset.tools.toLowerCase();
+      const match = name.includes(input) || cargo.includes(input) || tools.includes(input);
+      card.style.display = match ? 'block' : 'none';
+    });
+  }
+</script>
