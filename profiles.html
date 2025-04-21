@@ -26,6 +26,13 @@
     width: 260px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.06);
     text-align: center;
+    transition: transform 0.2s ease;
+    background-color: #fff;
+  }
+
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   }
 
   .card img {
@@ -56,43 +63,39 @@
     {
       nombre: "Jane Doe",
       cargo: "Software Engineer",
-      herramientas: ["Python", "JavaScript"],
+      herramientas: ["Python", "JavaScript", "Docker", "AWS", "SQL"],
       pais: "🇺🇸 USA",
       correo: "jane.doe@example.com",
       lider: "Mark White",
-      foto: "https://randomuser.me/api/portraits/women/1.jpg"
+      foto: "data:image/jpeg;base64,PUT_AQUI_TU_BASE64" // reemplaza esto
     },
     {
       nombre: "John Smith",
       cargo: "Product Manager",
-      herramientas: ["Agile", "JIRA"],
+      herramientas: ["Agile", "JIRA", "Confluence"],
       pais: "🇬🇧 UK",
       correo: "john.smith@example.com",
       lider: "Mark White",
-      foto: "https://randomuser.me/api/portraits/men/2.jpg"
-    },
-    {
-      nombre: "Carla Rodríguez",
-      cargo: "UX Designer",
-      herramientas: ["Figma", "Sketch"],
-      pais: "🇲🇽 México",
-      correo: "carla.rodriguez@example.com",
-      lider: "Sarah Brown",
-      foto: "https://randomuser.me/api/portraits/women/3.jpg"
+      foto: "data:image/jpeg;base64,PUT_AQUI_TU_BASE64"
     }
-    // Puedes agregar más personas aquí o cargar desde un archivo JSON externo
+    // más personas...
   ];
 
   function renderCards(data) {
     const container = document.getElementById('cards');
     container.innerHTML = "";
     data.forEach(p => {
+      let herramientasVisibles = p.herramientas.slice(0, 3).join(', ');
+      if (p.herramientas.length > 3) {
+        herramientasVisibles += '...';
+      }
+
       container.innerHTML += `
         <div class="card">
           <img src="${p.foto}" alt="${p.nombre}">
           <h3>${p.nombre}</h3>
           <p><strong>Cargo:</strong> ${p.cargo}</p>
-          <p><strong>Herramientas:</strong> ${p.herramientas.join(', ')}</p>
+          <p><strong>Herramientas:</strong> ${herramientasVisibles}</p>
           <p><strong>País:</strong> ${p.pais}</p>
           <p><strong>Correo:</strong> ${p.correo}</p>
           <p><strong>Líder:</strong> ${p.lider}</p>
@@ -110,6 +113,5 @@
     renderCards(filtered);
   }
 
-  // Render inicial
   renderCards(personas);
 </script>
