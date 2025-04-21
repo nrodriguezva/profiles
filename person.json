@@ -1,0 +1,20 @@
+[
+  {
+    "nombre": "Jane Doe",
+    "cargo": "Software Engineer",
+    "herramientas": ["Python", "Docker", "AWS", "Jenkins"],
+    "pais": "🇺🇸 USA",
+    "correo": "jane.doe@example.com",
+    "lider": "Mark White",
+    "foto": "https://bitbucket.org/tu_usuario/perfiles_confluencia/raw/main/fotos/jane.jpg"
+  },
+  {
+    "nombre": "John Smith",
+    "cargo": "Product Manager",
+    "herramientas": ["Agile", "JIRA", "Confluence"],
+    "pais": "🇬🇧 UK",
+    "correo": "john.smith@example.com",
+    "lider": "Sara Black",
+    "foto": "https://bitbucket.org/tu_usuario/perfiles_confluencia/raw/main/fotos/john.jpg"
+  }
+]
