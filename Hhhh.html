@@ -1,0 +1,58 @@
+def formatLog(String log) {
+    def htmlLog = new StringBuilder()
+    log.eachLine { line ->
+        def cssClass = 'info'
+        if (line.contains('ERROR')) {
+            cssClass = 'error'
+        } else if (line.contains('WARNING')) {
+            cssClass = 'warning'
+        } else if (line.contains('DEBUG')) {
+            cssClass = 'debug'
+        }
+        htmlLog << "<div class=\"${cssClass}\">${line}</div>\n"
+    }
+    return htmlLog.toString()
+}
+
+def styledLog = formatLog(logresult)
+
+def htmlContent = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Log del Pipeline</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #1e1e1e;
+      color: #f1f1f1;
+      padding: 20px;
+    }
+    .log-container {
+      background: #2e2e2e;
+      border-radius: 8px;
+      padding: 15px;
+      white-space: pre-wrap;
+    }
+    .info    { color: #9cdcfe; }
+    .warning { color: #dcdcaa; }
+    .error   { color: #f44747; font-weight: bold; }
+    .debug   { color: #6a9955; }
+  </style>
+</head>
+<body>
+  <h2>Log del Pod de OpenShift</h2>
+  <div class="log-container">
+    ${styledLog}
+  </div>
+</body>
+</html>
+"""
+
+emailext(
+  subject: "Resultado del Pipeline - Log de Pod",
+  mimeType: 'text/html',
+  body: htmlContent,
+  to: 'destinatario@ejemplo.com'
+)
