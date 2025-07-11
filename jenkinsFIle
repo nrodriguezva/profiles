@@ -1,0 +1,56 @@
+def jobName = env.JOB_NAME
+def targetNode = getTargetNodeFromCSV(jobName)
+
+node(targetNode) {
+    stage('Preparar') {
+        echo "Job: ${jobName}"
+        echo "Desplegaré en el nodo: ${targetNode}"
+    }
+
+    stage('Desplegar') {
+        sh './deploy.sh'
+    }
+}
+
+// Función para extraer nodo desde archivo CSV
+def getTargetNodeFromCSV(String jobName) {
+    // Extraer prefijo del job (ej: COL_Dev_Pipeline → COL y Dev)
+    def parts = jobName.tokenize('_')
+    if (parts.size() < 2) {
+        error "Nombre de job no tiene el formato esperado: PAIS_AMBIENTE_Pipeline"
+    }
+
+    def pais = parts[0].toUpperCase()
+    def ambiente = parts[1].capitalize()  // Dev, Test, PrePro, Pro
+
+    echo "Buscando nodo para País: ${pais}, Ambiente: ${ambiente}"
+
+    def foundNode = null
+    def csvFile = 'hosts.csv' // asegúrate de que esté en el workspace
+
+    def lines = readFile(csvFile).split('\n')
+    def header = true
+
+    for (line in lines) {
+        if (header) {
+            header = false
+            continue
+        }
+
+        def cols = line.split(',')
+        def csvPais = cols[0].trim()
+        def csvAmbiente = cols[1].trim()
+        def csvHost = cols[2].trim()
+
+        if (csvPais == pais && csvAmbiente == ambiente) {
+            foundNode = csvHost
+            break
+        }
+    }
+
+    if (!foundNode) {
+        error "No se encontró nodo para ${pais} - ${ambiente} en el CSV"
+    }
+
+    return foundNode
+}
