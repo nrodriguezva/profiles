@@ -1,56 +1,55 @@
-def jobName = env.JOB_NAME
-def targetNode = getTargetNodeFromCSV(jobName)
-
-node(targetNode) {
-    stage('Preparar') {
-        echo "Job: ${jobName}"
-        echo "Desplegaré en el nodo: ${targetNode}"
+pipeline {
+    agent any
+    environment {
+        NEXUS_URL = "https://nexus/your-repo-path"
+        NEXUS_REPO = "nombre-del-repositorio"
+        COMMIT_HASH8 = "abcdef12"
+        NEXUS_USER = credentials('nexus-user')
+        NEXUS_PASS = credentials('nexus-pass')
     }
+    stages {
+        stage('Buscar artefacto en Nexus') {
+            steps {
+                script {
+                    def foundUrl = null
 
-    stage('Desplegar') {
-        sh './deploy.sh'
-    }
-}
+                    // Obtener listado de carpetas por fecha
+                    def folderListResponse = sh(
+                        script: """curl -s -u $NEXUS_USER:$NEXUS_PASS "$NEXUS_URL/$NEXUS_REPO/" """,
+                        returnStdout: true
+                    )
 
-// Función para extraer nodo desde archivo CSV
-def getTargetNodeFromCSV(String jobName) {
-    // Extraer prefijo del job (ej: COL_Dev_Pipeline → COL y Dev)
-    def parts = jobName.tokenize('_')
-    if (parts.size() < 2) {
-        error "Nombre de job no tiene el formato esperado: PAIS_AMBIENTE_Pipeline"
-    }
+                    // Extraer fechas con regex
+                    def fechas = folderListResponse.readLines().findAll { it =~ /href="(\\d{4}-\\d{2}-\\d{2})\\// }.collect {
+                        (it =~ /href="(\\d{4}-\\d{2}-\\d{2})\\//)[0][1]
+                    }
 
-    def pais = parts[0].toUpperCase()
-    def ambiente = parts[1].capitalize()  // Dev, Test, PrePro, Pro
+                    echo "Fechas encontradas: ${fechas}"
 
-    echo "Buscando nodo para País: ${pais}, Ambiente: ${ambiente}"
+                    // Buscar en cada fecha
+                    for (fecha in fechas) {
+                        def listado = sh(
+                            script: """curl -s -u $NEXUS_USER:$NEXUS_PASS "$NEXUS_URL/$NEXUS_REPO/$fecha/" """,
+                            returnStdout: true
+                        )
 
-    def foundNode = null
-    def csvFile = 'hosts.csv' // asegúrate de que esté en el workspace
+                        def match = listado.readLines().find { it.contains("${COMMIT_HASH8}") }
 
-    def lines = readFile(csvFile).split('\n')
-    def header = true
+                        if (match) {
+                            def fileName = (match =~ /href="([^"]*${COMMIT_HASH8}[^"]*)"/)[0][1]
+                            foundUrl = "$NEXUS_URL/$NEXUS_REPO/$fecha/$fileName"
+                            break
+                        }
+                    }
 
-    for (line in lines) {
-        if (header) {
-            header = false
-            continue
+                    if (foundUrl) {
+                        echo "Artefacto encontrado: ${foundUrl}"
+                        // Puedes usar el archivo aquí
+                    } else {
+                        error "No se encontró el artefacto con hash ${COMMIT_HASH8}"
+                    }
+                }
+            }
         }
-
-        def cols = line.split(',')
-        def csvPais = cols[0].trim()
-        def csvAmbiente = cols[1].trim()
-        def csvHost = cols[2].trim()
-
-        if (csvPais == pais && csvAmbiente == ambiente) {
-            foundNode = csvHost
-            break
-        }
     }
-
-    if (!foundNode) {
-        error "No se encontró nodo para ${pais} - ${ambiente} en el CSV"
-    }
-
-    return foundNode
 }
