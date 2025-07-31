@@ -1,53 +1,38 @@
 pipeline {
     agent any
     environment {
-        NEXUS_URL = "https://nexus/your-repo-path"
-        NEXUS_REPO = "nombre-del-repositorio"
+        NEXUS_URL = "https://nexus.ejemplo.com"
+        NEXUS_REPO = "artefactos-raw"
         COMMIT_HASH8 = "abcdef12"
         NEXUS_USER = credentials('nexus-user')
         NEXUS_PASS = credentials('nexus-pass')
     }
     stages {
-        stage('Buscar artefacto en Nexus') {
+        stage('Buscar y descargar artefacto') {
             steps {
                 script {
-                    def foundUrl = null
+                    // Guardamos el JSON
+                    sh """
+                        curl -s -u ${NEXUS_USER}:${NEXUS_PASS} "${NEXUS_URL}/service/rest/v1/search?repository=${NEXUS_REPO}&q=${COMMIT_HASH8}" \
+                        -o resultado_nexus.json
+                    """
 
-                    // Obtener listado de carpetas por fecha
-                    def folderListResponse = sh(
-                        script: """curl -s -u $NEXUS_USER:$NEXUS_PASS "$NEXUS_URL/$NEXUS_REPO/" """,
+                    // Extraemos la primera URL
+                    def downloadUrl = sh(
+                        script: "cat resultado_nexus.json | jq -r '.items[0].assets[0].downloadUrl'",
                         returnStdout: true
-                    )
+                    ).trim()
 
-                    // Extraer fechas con regex
-                    def fechas = folderListResponse.readLines().findAll { it =~ /href="(\\d{4}-\\d{2}-\\d{2})\\// }.collect {
-                        (it =~ /href="(\\d{4}-\\d{2}-\\d{2})\\//)[0][1]
+                    if (!downloadUrl || downloadUrl == "null") {
+                        error "No se encontró un artefacto con el hash ${COMMIT_HASH8}"
                     }
 
-                    echo "Fechas encontradas: ${fechas}"
+                    echo "Descargando archivo desde: ${downloadUrl}"
 
-                    // Buscar en cada fecha
-                    for (fecha in fechas) {
-                        def listado = sh(
-                            script: """curl -s -u $NEXUS_USER:$NEXUS_PASS "$NEXUS_URL/$NEXUS_REPO/$fecha/" """,
-                            returnStdout: true
-                        )
-
-                        def match = listado.readLines().find { it.contains("${COMMIT_HASH8}") }
-
-                        if (match) {
-                            def fileName = (match =~ /href="([^"]*${COMMIT_HASH8}[^"]*)"/)[0][1]
-                            foundUrl = "$NEXUS_URL/$NEXUS_REPO/$fecha/$fileName"
-                            break
-                        }
-                    }
-
-                    if (foundUrl) {
-                        echo "Artefacto encontrado: ${foundUrl}"
-                        // Puedes usar el archivo aquí
-                    } else {
-                        error "No se encontró el artefacto con hash ${COMMIT_HASH8}"
-                    }
+                    // Descargar el archivo
+                    sh """
+                        curl -u ${NEXUS_USER}:${NEXUS_PASS} -O "${downloadUrl}"
+                    """
                 }
             }
         }
