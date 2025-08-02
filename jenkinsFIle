@@ -1,40 +1,11 @@
-pipeline {
-    agent any
-    environment {
-        NEXUS_URL = "https://nexus.ejemplo.com"
-        NEXUS_REPO = "artefactos-raw"
-        COMMIT_HASH8 = "abcdef12"
-        NEXUS_USER = credentials('nexus-user')
-        NEXUS_PASS = credentials('nexus-pass')
-    }
-    stages {
-        stage('Buscar y descargar artefacto') {
-            steps {
-                script {
-                    // Guardamos el JSON
-                    sh """
-                        curl -s -u ${NEXUS_USER}:${NEXUS_PASS} "${NEXUS_URL}/service/rest/v1/search?repository=${NEXUS_REPO}&q=${COMMIT_HASH8}" \
-                        -o resultado_nexus.json
-                    """
+                def jsonText = readFile('resultado_nexus.json')
+                def parsed = new groovy.json.JsonSlurper().parseText(jsonText)
+                def downloadUrl = parsed.items[0]?.assets[0]?.downloadUrl
 
-                    // Extraemos la primera URL
-                    def downloadUrl = sh(
-                        script: "cat resultado_nexus.json | jq -r '.items[0].assets[0].downloadUrl'",
-                        returnStdout: true
-                    ).trim()
-
-                    if (!downloadUrl || downloadUrl == "null") {
-                        error "No se encontró un artefacto con el hash ${COMMIT_HASH8}"
-                    }
-
-                    echo "Descargando archivo desde: ${downloadUrl}"
-
-                    // Descargar el archivo
-                    sh """
-                        curl -u ${NEXUS_USER}:${NEXUS_PASS} -O "${downloadUrl}"
-                    """
+                if (!downloadUrl) {
+                    error "No se encontró un artefacto válido con el hash ${COMMIT_HASH8}"
                 }
-            }
-        }
-    }
-}
+
+                sh """
+                    curl -u ${NEXUS_USER}:${NEXUS_PASS} -O "${downloadUrl}"
+                """
