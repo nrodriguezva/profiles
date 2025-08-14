@@ -1,0 +1,80 @@
+Aquí tienes un comparativo claro entre **Sonatype Nexus Repository Community Edition (CE)** —la versión gratuita mejorada— y la versión paga **Pro**, basado en información actualizada hasta julio de 2025:
+
+---
+
+## Nexus Repository Community Edition (CE)
+
+### ¿Qué es?
+
+* A partir de la versión **3.77.0**, Nexus Repository OSS fue renombrado como **Community Edition** ([Sonatype Community][1], [sonatype.com][2]).
+* Sigue siendo una oferta gratuita orientada a equipos individuales o pequeños, con mejoras significativas sobre la versión OSS tradicional ([sonatype.com][2]).
+
+### Características destacadas
+
+* **Soporte completo para ecosistema de formatos**: Maven, npm, PyPI, Docker, Hugging Face, Rust (Cargo), Composer (PHP), Conan V2, entre otros ([sonatype.com][2], [help.sonatype.com][3]).
+* **Integración con CI/CD**: Jenkins, GitHub Actions, GitLab CI/CD y más ([sonatype.com][4]).
+* **Base de datos externa con PostgreSQL**: mejora la confiabilidad frente al antiguo H2, ideal para despliegues modernos como Kubernetes ([sonatype.com][2]).
+* **Límites de uso**: hasta **200,000 solicitudes por día** y **100,000 componentes**. Si se superan, comienza a rechazar nuevas solicitudes ([sonatype.com][2], [Sonatype Community][1]).
+
+### Ventajas
+
+* Ofrece muchas de las funcionalidades previamente exclusivas de la versión Pro, ahora sin costo, como soporte ampliado de formatos y base de datos PostgreSQL ([sonatype.com][2], [Sonatype Community][1]).
+* Permite una transición sencilla desde OSS con mejoras en resiliencia, formatos modernos y soporte de infraestructura ([sonatype.com][4]).
+
+---
+
+## Nexus Repository Professional (Pro)
+
+### ¿Qué añade respecto a CE?
+
+Según la matriz oficial de características y capturas de Sonatype (julio 2025):
+
+* **Almacenamiento avanzado**:
+
+  * Integración con Azure Blob, Google Blob Store, capacidades para cambiar repositorios blob, exportar activos ([help.sonatype.com][5]).
+* **Alta disponibilidad (HA)**, **replicación de contenido**, **despliegues resilientes**, ideal para infraestructuras críticas ([help.sonatype.com][5]).
+* **Etiquetado de componentes** (component tagging) y **build promotion/staging**, esenciales para flujos de CI/CD controlados ([sonatype.com][6], [help.sonatype.com][5]).
+* **Controles de seguridad y autenticación avanzados**:
+
+  * Mapeo de roles externos, token de autenticación, integración con Crowd, LDAP avanzado, SSO/SAML ([sonatype.com][6]).
+* **Health Check detallado** del repositorio, para análisis de vulnerabilidades, licencias y popularidad de componentes ([sonatype.com][6]).
+* **Soporte profesional con SLA** y acceso directo al equipo de Sonatype para soporte, optimización, configuración, etc. ([sonatype.com][6], [help.sonatype.com][5]).
+
+### Pricing y soporte
+
+* La edición Pro incluye **soporte empresarial**, **SLA** y atención directa del equipo Sonatype ([sonatype.com][4]).
+* Según documentación previa (2019), el precio arrancaba en aproximadamente **\$3,000/año** para 25 usuarios, pero este dato puede variar ([sonatype.com][6]).
+
+---
+
+## Cuadro comparativo
+
+| Funcionalidad                          | Community Edition (CE)                                                    | Professional (Pro)                               |
+| -------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
+| Soporte de formatos (Maven, npm, etc.) | Sí (incluye nuevos formatos como Hugging Face, Cargo, Conan V2, Composer) | Sí                                               |
+| Integración CI/CD                      | Sí                                                                        | Sí                                               |
+| Base de datos externa (PostgreSQL)     | Sí                                                                        | Sí                                               |
+| Límites de uso/sobrecarga              | Hasta 200K solicitudes/día y 100K componentes; después rechaza nuevas     | Sin límites                                      |
+| Alta disponibilidad / replicación      | No                                                                        | Sí                                               |
+| Blob Stores avanzados (Azure/GCP/S3)   | No                                                                        | Sí                                               |
+| Etiquetado de componentes / staging    | No                                                                        | Sí                                               |
+| Health Check detallado                 | No                                                                        | Sí                                               |
+| Seguridad / autenticación avanzada     | No (solo básico)                                                          | Sí (SSO, LDAP/Crowd, tokens, etc.)               |
+| Soporte técnico / SLA                  | Comunidad / básica                                                        | Profesional / SLA                                |
+| Ideal para...                          | Pequeños a medianos equipos, cargas moderadas                             | Operaciones críticas, alta escala y cumplimiento |
+
+---
+
+## Conclusión
+
+* **Community Edition** es ideal si tu equipo está creciendo, deseas más formatos y confiabilidad (PostgreSQL), y tus cargas están dentro de los límites establecidos.
+* **Professional** es clave si necesitas soporte garantizado, tolerancia a fallos, control avanzado en tu pipeline CI/CD, seguridad reforzada y sin limitaciones operativas.
+
+¿Quieres que exploremos precios actuales de Pro o casos de uso específicos en tu contexto?
+
+[1]: https://community.sonatype.com/t/sonatype-nexus-repository-oss-is-now-community-edition/14324?utm_source=chatgpt.com "Sonatype Nexus Repository OSS is now Community Edition"
+[2]: https://www.sonatype.com/blog/sonatype-nexus-repository-community-edition?utm_source=chatgpt.com "Introducing Nexus Repository Community Edition"
+[3]: https://help.sonatype.com/en/sonatype-nexus-repository.html?utm_source=chatgpt.com "Sonatype Nexus Repository"
+[4]: https://www.sonatype.com/products/nexus-community-edition-download?utm_source=chatgpt.com "Download Nexus Repository Community Edition"
+[5]: https://help.sonatype.com/en/nexus-repository-feature-matrix.html?utm_source=chatgpt.com "Nexus Repository Feature Matrix"
+[6]: https://www.sonatype.com/hubfs/conversion%20focused%20lp/SON_Top_Reasons_Repo_Pro_jan10.pdf?hsLang=en-us%2F1000&utm_source=chatgpt.com "Nexus Repository OSS vs. Pro"
