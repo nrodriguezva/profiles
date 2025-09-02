@@ -36,3 +36,6 @@ De un proceso **totalmente manual**, desgastante y repetido, pasamos a un **sist
 
 ¿Te gustaría que armemos este ejemplo como diapositiva explicativa, infografía o parte de una capacitación? También podemos usar otro ejemplo histórico, como la **producción de pan** o la **agricultura**.
 for s in google.com github.com openai.com; do ping -c1 -W1 $s &>/dev/null && ping -c1 $s | head -1 | grep -oP '\(\K[^\)]+'; done
+
+
+JAVA_ARGS="-Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000"
