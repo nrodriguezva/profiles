@@ -1,41 +1,260 @@
-¡Perfecto! Vamos con un ejemplo **aún más básico y universal**, con elementos históricos y cotidianos que muestren cómo la humanidad ha aplicado, *sin saberlo*, la **metodología ESOAR** desde tiempos antiguos. Este ejemplo es ideal para enseñar el concepto a personas no técnicas.
+FASE 2: STANDARDIZE – Definir una forma única y controlada de ejecutar el proceso
 
----
+Objetivo
 
-## 📚 Ejemplo básico: **Proceso de obtener agua desde un río**
+Definir una forma única, repetible y controlada de ejecutar el proceso, eliminando variaciones innecesarias que causen errores, demoras o confusión.
 
-Este proceso se remonta a la prehistoria y ha evolucionado con la humanidad. Veremos cómo, con la metodología **ESOAR**, se fue automatizando gradualmente.
+Esta fase es clave para asegurar que el proceso esté listo para ser optimizadado y luego automatizado, ya que un proceso inconsistente no se puede automatizar correctamente.
 
----
+¿Qué implica estandarizar?
 
-### 🔁 Aplicación ESOAR: Obtener agua del río
+Unificar los pasos del proceso (que todos lo hagan igual).
+Definir entradas y salidas claras.
+Establecer responsables por actividad.
+Alinear con políticas, procedimientos o normativas.
+Documentar la versión oficial del proceso.
+Crear plantillas, formatos o scripts base.
 
-| Fase                | Aplicación histórica / cotidiana                                                                                                                                                                                                         |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **E – Eliminate**   | 🔍 Antes, se caminaba largas distancias varias veces al día para llenar vasijas.<br>✅ Se elimina la necesidad de ir todos los días creando **almacenamiento de agua en el hogar** (tinajas, barriles).                                   |
-| **S – Standardize** | 📘 Se define una forma estándar de recolección: <br>– Uso de vasijas del mismo tamaño.<br>– Horario fijo para recoger agua.<br>– Ruta establecida al río.<br>Esto evita caos o repeticiones innecesarias.                                |
-| **O – Optimize**    | 🔧 Se mejora el proceso:<br>– Se construyen **canales de riego** o pozos más cercanos.<br>– Se usan **carros con ruedas** o **mulas** para transportar más cantidad.<br>– Se organizan turnos comunitarios para evitar filas.            |
-| **A – Automate**    | 🤖 Se implementa un **sistema de poleas o bombas manuales** para sacar agua del pozo sin cargarla físicamente. <br>El proceso ya no requiere esfuerzo físico directo constante.                                                          |
-| **R – Robotize**    | 🦾 Finalmente, llega la **bomba eléctrica de agua**: <br>– Con solo presionar un botón, el agua llega a la casa.<br>– Incluso se programan sistemas de riego o llenado automático.<br>– El ser humano ya no está presente en el proceso. |
+¿Qué se debe revisar en esta fase?
 
----
+Elemento
+Preguntas clave
+Flujo del proceso
+¿Existe un único camino válido? ¿Se siguen rutas diferentes según el analista o área?
+Datos de entrada
+¿Los datos llegan completos? ¿Hay un formato estándar de solicitud?
+Validaciones
+¿Se validan siempre los mismos criterios? ¿Con qué lógica o checklist?
+Responsables
+¿Hay roles y responsables definidos por paso? ¿Están alineados con RACI?
+Herramientas
+¿Se usan diferentes plataformas según el turno o el analista?
 
-## 🎯 Resultado de la evolución
+Roles involucrados
 
-De un proceso **totalmente manual**, desgastante y repetido, pasamos a un **sistema automatizado**, estandarizado, con cero intervención humana directa.
-
----
-
-### ✅ ¿Por qué es un buen ejemplo?
-
-* Es **conocido por todos** sin importar el contexto técnico.
-* Muestra cómo la **automatización es progresiva**, no inmediata.
-* Refuerza que **eliminar tareas innecesarias** es el primer paso, **no escribir código**.
-
----
-
-¿Te gustaría que armemos este ejemplo como diapositiva explicativa, infografía o parte de una capacitación? También podemos usar otro ejemplo histórico, como la **producción de pan** o la **agricultura**.
-for s in google.com github.com openai.com; do ping -c1 -W1 $s &>/dev/null && ping -c1 $s | head -1 | grep -oP '\(\K[^\)]+'; done
+Rol
+Función
+Dueño del proceso
+Valida que lo definido sea funcionalmente correcto.
+Equipo técnico / Automatización
+Define cómo se aplicará de forma técnica.
+QA / Documentación
+Revisa consistencia, reglas, entradas y salidas.
+Seguridad
+Válida cumplimiento con normativas y accesos.
 
 
-JAVA_ARGS="-Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000"
+	
+Herramientas recomendadas
+
+Diagramas de flujo estandarizados.
+Plantillas para entradas/salidas (formularios, templates Excel/Word).
+Checklist funcional o técnico.
+Matriz RACI – para asignar roles/responsables.
+
+Entregables clave
+
+
+Entregable
+Descripción
+Documento TO-BE del proceso
+Diagrama y descripción clara del proceso estandarizado.
+Formato de entrada unificado	
+Ejemplo: Formulario web para solicitud de reinicio.
+Checklist de validaciones previas y posteriores
+Lo que debe cumplirse siempre para ejecutar el proceso.
+Matriz de roles y responsables (RACI)
+Define qué rol ejecuta, aprueba, revisa o se informa.
+
+
+	
+	
+Estructura sugerida del documento TO-BE
+
+Nombre del proceso y versión
+Propósito del proceso
+Entradas requeridas (datos, autorizaciones, herramientas)
+Flujo paso a paso estandarizado
+Responsables por paso
+Salidas esperadas (logs, evidencias, correos, tickets cerrados)
+Reglas o condiciones (ej: horarios, entornos, excepciones)
+Checklist de verificación
+Flujo visual BPMN o diagrama funcional
+Vínculos a scripts, formularios o configuraciones
+
+__________________________________________________________
+
+FASE 3: OPTIMIZE – Mejorar la eficiencia del proceso antes de automatizarlo
+
+Objetivo
+Tomar el proceso ya eliminado de redundancias (fase Eliminate) y estandarizado (fase Standardize), para mejorarlo en tiempo, calidad y costos.
+La idea es dejarlo en su versión más eficiente posible antes de automatizarlo.
+
+¿Qué significa optimizar en este contexto?
+Reducir tiempos de ejecución del proceso.
+
+
+Minimizar pasos manuales sin eliminar la trazabilidad.
+
+
+Disminuir dependencias entre equipos.
+
+
+Reutilizar componentes o herramientas existentes.
+
+
+Incorporar buenas prácticas de ITIL, DevOps o Lean.
+
+
+Garantizar que los datos de entrada/salida sean los mínimos necesarios y estén claros.
+
+
+
+
+Preguntas clave para identificar optimización
+Tiempo y esfuerzo: ¿Qué pasos consumen más tiempo? ¿Se pueden paralelizar?
+
+
+Interdependencias: ¿Qué pasos dependen innecesariamente de otros equipos?
+
+
+Errores: ¿Dónde ocurren más errores? ¿Se pueden reducir con validaciones automáticas?
+
+
+Tecnología: ¿Se pueden usar APIs, integraciones o herramientas ya disponibles?
+
+
+Datos: ¿Podemos reducir la cantidad de información solicitada sin perder valor?
+
+
+Monitoreo: ¿Cómo asegurar visibilidad y trazabilidad sin agregar burocracia?
+
+
+
+Roles involucrados en la optimización
+Rol
+Función
+Arquitecto de procesos / soluciones
+Propone mejoras técnicas y funcionales.
+Dueño del proceso
+Valida que la mejora no afecte la operación.
+Equipo técnico IT (Infra/Apps/Soporte)
+Sugiere automatizaciones parciales o mejores herramientas.
+Seguridad
+Revisa que los cambios no comprometan compliance.
+QA / Documentación
+Garantiza consistencia y actualiza guías.
+
+
+Herramientas de apoyo
+Value Stream Mapping (VSM) – Identificar cuellos de botella.
+
+
+Matriz de priorización (Impacto vs Esfuerzo) – Elegir qué optimizar primero.
+
+
+Diagramas BPMN optimizados – Versión del proceso mejorado.
+
+
+ITIL/DevOps practices – Gestión de cambios, incidentes, disponibilidad.
+
+
+
+Entregables clave de la fase Optimize
+Entregable
+Descripción
+Documento TO-BE optimizado
+Proceso estandarizado con mejoras incorporadas.
+Mapa de valor (VSM)
+Visualización de desperdicios y mejoras implementadas.
+Lista de mejoras implementadas
+Ej.: reducción de tiempos, eliminación de dependencias.
+Métricas base
+Tiempo antes vs después, cantidad de errores, esfuerzo manual.
+
+
+Esta fase es la más tecnológica del marco, porque busca aplicar soluciones digitales y herramientas RPA (Robotic Process Automation), IA o scripts personalizados para reducir la intervención manual y garantizar eficiencia y escalabilidad.
+
+Objetivo de la fase de Automatización
+Eliminar tareas repetitivas y manuales.
+Reducir errores humanos.
+Aumentar la velocidad y capacidad de procesamiento.
+Permitir que los colaboradores enfoquen su tiempo en tareas de alto valor.
+
+Roles involucrados
+Equipo de Automatización / RPA
+
+
+Diseñan, desarrollan y prueban bots, scripts o integraciones.
+Pueden ser un equipo interno o un proveedor especializado.
+
+
+Área de TI / Infraestructura
+
+
+Garantiza que las herramientas y plataformas de automatización sean seguras, escalables y estén integradas con los sistemas existentes.
+
+
+Dueño del Proceso
+
+
+Valida los criterios funcionales y asegura que los bots o scripts cumplan con los objetivos del proceso.
+
+
+Usuarios finales (Operación)
+
+
+Participan en pruebas piloto, dando feedback sobre la efectividad de la automatización.
+
+
+
+🔹 Entregables de esta fase
+Mapa de procesos automatizables (con prioridad y viabilidad).
+Casos de negocio de automatización (ahorro esperado, reducción de tiempo, ROI).
+Diseño técnico de la automatización (diagramas de flujo, arquitectura de bots, integraciones).
+Scripts / Bots / Workflows automatizados (ejecutables en la plataforma seleccionada).
+Plan de pruebas y validación (QA, piloto y feedback).
+Plan de escalamiento y mantenimiento de los bots.
+
+🔹 Actividades principales
+Identificación de oportunidades de automatización
+
+
+Usar matrices de priorización: frecuencia, volumen, tiempo invertido, impacto.
+Seleccionar procesos repetitivos, de bajo valor agregado y alta carga manual.
+
+
+Diseño de la automatización
+
+
+Definir entradas, salidas y reglas de negocio del proceso.
+Establecer la herramienta de automatización (RPA, scripts, workflows en BPM, IA, etc.).
+
+
+Desarrollo y pruebas
+
+
+Construcción de bots o scripts.
+Ejecución en ambiente de prueba.
+Ajustes según retroalimentación.
+
+
+Implementación piloto
+
+
+Automatización en un grupo pequeño de casos/productos.
+Medición de resultados (tiempo, errores, costos).
+
+
+Escalamiento y gobierno
+
+
+Extender la automatización a más procesos o áreas.
+Definir modelo de soporte y monitoreo de bots.
+
+
+
+
+
+Resultado → 90% de ahorro en tiempo y cero errores manuales.
+
