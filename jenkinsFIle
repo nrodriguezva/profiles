@@ -33,30 +33,33 @@ pipeline {
     }
 }
 
-// --- Función Groovy dentro del Jenkinsfile ---
 def updateStatus(String newStatus) {
-    def jsonFile = env.FILE_NAME
-    def pipelineName = env.JOB_NAME
+    def file = env.FILE_NAME
+    def name = env.JOB_NAME
 
     sh """
         echo "Descargando JSON desde Nexus..."
-        curl -u $NEXUS_USER:$NEXUS_PASS -s -o $jsonFile $NEXUS_URL
+        curl -u $NEXUS_USER:$NEXUS_PASS -s -o $file $NEXUS_URL
     """
 
-    def data = readJSON file: jsonFile
+    def data = readJSON file: file
 
-    if (data.containsKey(pipelineName)) {
-        echo "Actualizando estado de ${pipelineName} a ${newStatus}"
-        data[pipelineName] = newStatus
-    } else {
-        echo "Agregando nueva automatización: ${pipelineName}"
-        data[pipelineName] = newStatus
+    if (!(data instanceof List)) {
+        data = []
     }
 
-    writeJSON file: jsonFile, json: data, pretty: 4
+    def existing = data.find { it.containsKey(name) }
+
+    if (existing) {
+        existing[name] = newStatus
+    } else {
+        data << [(name): newStatus]
+    }
+
+    writeJSON file: file, json: data, pretty: 4
 
     sh """
         echo "Subiendo JSON actualizado a Nexus..."
-        curl -u $NEXUS_USER:$NEXUS_PASS -X PUT -T $jsonFile $NEXUS_URL
+        curl -u $NEXUS_USER:$NEXUS_PASS -X PUT -T $file $NEXUS_URL
     """
 }
