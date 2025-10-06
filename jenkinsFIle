@@ -1,49 +1,62 @@
 pipeline {
-    agent { label 'linux-node' }
+    agent any
+
+    environment {
+        NEXUS_URL = "https://nexus.tuempresa.com/repository/automation-status/automation_status.json"
+        NEXUS_USER = credentials('nexus-user')
+        NEXUS_PASS = credentials('nexus-pass')
+        FILE_NAME = "automation_status.json"
+    }
+
     stages {
-        stage('Validar disco') {
+        stage('Ejemplo de ejecución') {
             steps {
-                script {
-                    def rutaLogs = "/var/log/app"
-                    def umbral = 95
-
-                    // Uso actual en porcentaje
-                    def usoActual = sh(script: "df -h / | awk 'NR==2 {print substr(\$5, 1, length(\$5)-1)}'", returnStdout: true).trim().toInteger()
-                    echo "📊 Uso actual del disco: ${usoActual}%"
-
-                    if (usoActual > umbral) {
-                        echo "⚠️ El disco está por encima del ${umbral}%, evaluando limpieza..."
-
-                        // Calcular tamaño total de logs >30 días (en MB)
-                        def tamLogs = sh(script: "find ${rutaLogs} -type f -mtime +30 -exec du -cm {} + | tail -n1 | awk '{print \$1}'", returnStdout: true).trim()
-                        tamLogs = tamLogs.isEmpty() ? 0 : tamLogs.toInteger()
-
-                        echo "📂 Tamaño de logs a eliminar (>30 días): ${tamLogs} MB"
-
-                        if (tamLogs > 0) {
-                            // Espacio libre actual en MB
-                            def libreMB = sh(script: "df -m / | awk 'NR==2 {print \$4}'", returnStdout: true).trim().toInteger()
-                            def totalMB = sh(script: "df -m / | awk 'NR==2 {print \$2}'", returnStdout: true).trim().toInteger()
-
-                            def librePost = libreMB + tamLogs
-                            def usoPost = 100 - ((librePost * 100) / totalMB)
-
-                            echo "📊 Uso estimado después de limpiar: ${usoPost.intValue()}%"
-
-                            if (usoPost < umbral) {
-                                echo "✅ Se eliminarán los logs viejos para liberar espacio"
-                                sh "find ${rutaLogs} -type f -mtime +30 -delete"
-                            } else {
-                                echo "❌ Aún eliminando logs no bajamos del ${umbral}%, se requiere otra acción"
-                            }
-                        } else {
-                            echo "❌ No hay logs mayores a 30 días para eliminar"
-                        }
-                    } else {
-                        echo "✅ El disco está por debajo del ${umbral}%, no es necesario limpiar"
-                    }
-                }
+                echo "Aquí iría la lógica principal del pipeline..."
+                // error("Forzar fallo para probar el post") // Descomenta para probar el bloque failure
             }
         }
     }
+
+    post {
+        success {
+            script {
+                echo "✅ Pipeline finalizado con éxito. Estado: UP"
+                updateStatus("UP")
+            }
+        }
+        failure {
+            script {
+                echo "❌ Pipeline fallido. Estado: DOWN"
+                updateStatus("DOWN")
+            }
+        }
+    }
+}
+
+// --- Función Groovy dentro del Jenkinsfile ---
+def updateStatus(String newStatus) {
+    def jsonFile = env.FILE_NAME
+    def pipelineName = env.JOB_NAME
+
+    sh """
+        echo "Descargando JSON desde Nexus..."
+        curl -u $NEXUS_USER:$NEXUS_PASS -s -o $jsonFile $NEXUS_URL
+    """
+
+    def data = readJSON file: jsonFile
+
+    if (data.containsKey(pipelineName)) {
+        echo "Actualizando estado de ${pipelineName} a ${newStatus}"
+        data[pipelineName] = newStatus
+    } else {
+        echo "Agregando nueva automatización: ${pipelineName}"
+        data[pipelineName] = newStatus
+    }
+
+    writeJSON file: jsonFile, json: data, pretty: 4
+
+    sh """
+        echo "Subiendo JSON actualizado a Nexus..."
+        curl -u $NEXUS_USER:$NEXUS_PASS -X PUT -T $jsonFile $NEXUS_URL
+    """
 }
