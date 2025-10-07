@@ -127,5 +127,7 @@ def updateStatus(String newStatus) {
         echo "Subiendo JSON actualizado a Nexus..."
         curl -u $NEXUS_USER:$NEXUS_PASS -X PUT -T $file $NEXUS_URL
     """
-}java -DproxySet=false -Djava.net.useSystemProxies=false -jar agent.jar -jnlpUrl https://jenkins.midominio.com/computer/AGENTE/jenkins-agent.jnlp -secret <token> -webSocket
+}
+java -DproxySet=false -Djava.net.useSystemProxies=false -jar agent.jar -jnlpUrl https://jenkins.midominio.com/computer/AGENTE/jenkins-agent.jnlp -secret <token> -webSocket
+java -Djava.net.useSystemProxies=false -DproxySet=false -Dhttp.proxyHost= -Dhttp.proxyPort= -Dhttps.proxyHost= -Dhttps.proxyPort= -jar agent.jar -jnlpUrl https://tuservidor/jenkins/computer/agente/slave-agent.jnlp -secret ABC123456
 
