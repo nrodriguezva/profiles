@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Leer CSV y Filtrar Servidores') {
+            steps {
+                script {
+                    // Detectar ambiente desde el nombre del pipeline
+                    def jobName = env.JOB_NAME ?: "Pipeline_Default"
+                    def ambiente = "PROD"
+                    if (jobName.toUpperCase().contains("_DEV")) {
+                        ambiente = "DEV"
+                    } else if (jobName.toUpperCase().contains("_TEST")) {
+                        ambiente = "TEST"
+                    }
+
+                    echo "Ambiente detectado: ${ambiente}"
+                    echo "Leyendo CSV de servidores..."
+
+                    // Leer CSV
+                    def csvFile = readFile('servers.csv')
+                    def lineas = csvFile.readLines().drop(1) // omite encabezado
+
+                    // Mapa para agrupar por aplicación
+                    def servidoresPorApp = [:].withDefault { [] }
+
+                    // Procesar líneas
+                    lineas.each { linea ->
+                        def (hostname, ip, aplicacion, envLinea, dominio) = linea.split(',')
+                        if (envLinea.trim().equalsIgnoreCase(ambiente)) {
+                            servidoresPorApp[aplicacion.trim()] << [hostname: hostname.trim(), dominio: dominio.trim()]
+                        }
+                    }
+
+                    // Mostrar resultados
+                    echo "=== Servidores agrupados por aplicación (${ambiente}) ==="
+                    servidoresPorApp.each { app, servidores ->
+                        echo "\nAplicación: ${app}"
+                        servidores.each { s ->
+                            echo "  - Host: ${s.hostname} | Dominio: ${s.dominio}"
+                        }
+                    }
+
+                    // Exportar como variable global si se requiere en otros stages
+                    env.SERVIDORES_JSON = groovy.json.JsonOutput.toJson(servidoresPorApp)
+                }
+            }
+        }
+
+        stage('Usar Información de Servidores') {
+            steps {
+                script {
+                    def servidoresPorApp = new groovy.json.JsonSlurper().parseText(env.SERVIDORES_JSON)
+
+                    // Ejemplo: acceder a una aplicación específica
+                    def app = "BusinessWorks_HR"
+                    if (servidoresPorApp.containsKey(app)) {
+                        echo "Servidores de ${app}:"
+                        servidoresPorApp[app].each { s ->
+                            echo "  ${s.hostname}.${s.dominio}"
+                        }
+                    } else {
+                        echo "No hay servidores para la aplicación ${app} en este ambiente."
+                    }
+                }
+            }
+        }
+    }
+}
