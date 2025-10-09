@@ -1,67 +1,32 @@
 pipeline {
     agent any
-
+    parameters {
+        text(name: 'ENTRADAS', defaultValue: '123=abc999\n789=qwe456', description: 'Llave=Valor por línea')
+    }
     stages {
-        stage('Leer CSV y Filtrar Servidores') {
+        stage('Actualizar CSV') {
             steps {
                 script {
-                    // Detectar ambiente desde el nombre del pipeline
-                    def jobName = env.JOB_NAME ?: "Pipeline_Default"
-                    def ambiente = "PROD"
-                    if (jobName.toUpperCase().contains("_DEV")) {
-                        ambiente = "DEV"
-                    } else if (jobName.toUpperCase().contains("_TEST")) {
-                        ambiente = "TEST"
+                    def csvPath = 'data.csv' // Ruta de tu archivo CSV
+                    def csv = readFile(csvPath).trim().split('\n') as List
+                    def encabezado = csv[0]
+                    def registros = csv[1..-1].collect { it.split(';') }.collectEntries { [(it[0]): it[1]] }
+
+                    // Procesar las líneas del parámetro
+                    def entradas = params.ENTRADAS.trim().split('\n')
+                    entradas.each { linea ->
+                        def (partner, apikey) = linea.split('=')
+                        partner = partner.trim()
+                        apikey = apikey.trim()
+                        registros[partner] = apikey  // actualiza o agrega
                     }
 
-                    echo "Ambiente detectado: ${ambiente}"
-                    echo "Leyendo CSV de servidores..."
+                    // Reconstruir el contenido del CSV
+                    def nuevoCsv = ([encabezado] + registros.collect { k, v -> "${k};${v}" }).join('\n')
 
-                    // Leer CSV
-                    def csvFile = readFile('servers.csv')
-                    def lineas = csvFile.readLines().drop(1) // omite encabezado
-
-                    // Mapa para agrupar por aplicación
-                    def servidoresPorApp = [:].withDefault { [] }
-
-                    // Procesar líneas
-                    lineas.each { linea ->
-                        def (hostname, ip, aplicacion, envLinea, dominio) = linea.split(',')
-                        if (envLinea.trim().equalsIgnoreCase(ambiente)) {
-                            servidoresPorApp[aplicacion.trim()] << [hostname: hostname.trim(), dominio: dominio.trim()]
-                        }
-                    }
-
-                    // Mostrar resultados
-                    echo "=== Servidores agrupados por aplicación (${ambiente}) ==="
-                    servidoresPorApp.each { app, servidores ->
-                        echo "\nAplicación: ${app}"
-                        servidores.each { s ->
-                            echo "  - Host: ${s.hostname} | Dominio: ${s.dominio}"
-                        }
-                    }
-
-                    // Exportar como variable global si se requiere en otros stages
-                    env.SERVIDORES_JSON = groovy.json.JsonOutput.toJson(servidoresPorApp)
-                }
-            }
-        }
-
-        stage('Usar Información de Servidores') {
-            steps {
-                script {
-                    def servidoresPorApp = new groovy.json.JsonSlurper().parseText(env.SERVIDORES_JSON)
-
-                    // Ejemplo: acceder a una aplicación específica
-                    def app = "BusinessWorks_HR"
-                    if (servidoresPorApp.containsKey(app)) {
-                        echo "Servidores de ${app}:"
-                        servidoresPorApp[app].each { s ->
-                            echo "  ${s.hostname}.${s.dominio}"
-                        }
-                    } else {
-                        echo "No hay servidores para la aplicación ${app} en este ambiente."
-                    }
+                    // Guardar cambios
+                    writeFile file: csvPath, text: nuevoCsv
+                    echo "Archivo actualizado:\n${nuevoCsv}"
                 }
             }
         }
