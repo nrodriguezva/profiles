@@ -1,34 +1,80 @@
-pipeline {
-    agent any
-    parameters {
-        text(name: 'ENTRADAS', defaultValue: '123=abc999\n789=qwe456', description: 'Llave=Valor por línea')
-    }
-    stages {
-        stage('Actualizar CSV') {
-            steps {
-                script {
-                    def csvPath = 'data.csv' // Ruta de tu archivo CSV
-                    def csv = readFile(csvPath).trim().split('\n') as List
-                    def encabezado = csv[0]
-                    def registros = csv[1..-1].collect { it.split(';') }.collectEntries { [(it[0]): it[1]] }
+void stgUpDateApiKey(def servidoresPorApp, def apiKeys) {
 
-                    // Procesar las líneas del parámetro
-                    def entradas = params.ENTRADAS.trim().split('\n')
-                    entradas.each { linea ->
-                        def (partner, apikey) = linea.split('=')
-                        partner = partner.trim()
-                        apikey = apikey.trim()
-                        registros[partner] = apikey  // actualiza o agrega
+    stage("UpDate ApiKey File") {
+        try {
+            servidoresPorApp.each { app ->
+
+                if (app.aplicacion.contains("BusinessWorks_HR")) {
+
+                    node(app.hostname) {
+
+                        def fecha = new Date().format("yyyyMMdd")
+                        def user = app.user
+                        def csvPath = "/tibco/COL_NotificationWhatsapp/ApiKeyAuthorization_AUT0${fecha}.csv"
+
+                        echo "Servidor: ${app.hostname}"
+                        echo "Usuario: ${user}"
+                        echo "Ruta CSV: ${csvPath}"
+
+                        // Leer archivo remoto
+                        def contenido = sh(script: "sudo -u ${user} cat ${csvPath}", returnStdout: true).trim()
+                        echo "Primeras líneas del archivo CSV:\n" + contenido.readLines().take(5).join('\n')
+
+                        // Convertir CSV en mapa (PartnerID -> ApiKey)
+                        def lineas = contenido.readLines()
+                        def encabezado = lineas[0]
+                        def registros = [:]
+
+                        lineas.tail().each { linea ->
+                            def partes = linea.split(';')
+                            if (partes.size() >= 2) {
+                                registros[partes[0].trim()] = partes[1].trim()
+                            }
+                        }
+
+                        // Procesar nuevas claves
+                        def entradas = apiKeys.trim().split('\n')
+                        entradas.each { entrada ->
+                            echo "Procesando entrada: ${entrada}"
+                            def partes = entrada.split(';')
+                            if (partes.size() >= 2) {
+                                def partner = partes[0].trim()
+                                def apikey = partes[1].trim()
+
+                                if (registros.containsKey(partner)) {
+                                    echo "Actualizando API key para ${partner}"
+                                } else {
+                                    echo "Agregando nueva API key para ${partner}"
+                                }
+
+                                registros[partner] = apikey
+                            }
+                        }
+
+                        // Limpiar registros nulos o vacíos
+                        registros = registros.findAll { k, v ->
+                            k && v && k.trim() && v.trim() && k != "null" && v != "null"
+                        }
+
+                        // Construir contenido nuevo del CSV
+                        def nuevoContenido = ([encabezado] + registros.collect { k, v -> "${k};${v}" })
+                            .findAll { it?.trim() }
+                            .join('\n')
+
+                        // Guardar archivo temporal
+                        def fileName = "ApiKeyAuthorization_AUTO${fecha}.csv"
+                        writeFile file: fileName, text: nuevoContenido
+
+                        // Copiar al destino
+                        sh "sudo -u ${user} cp ${fileName} ${csvPath}"
+
+                        echo "✅ CSV actualizado correctamente en ${app.hostname}"
                     }
-
-                    // Reconstruir el contenido del CSV
-                    def nuevoCsv = ([encabezado] + registros.collect { k, v -> "${k};${v}" }).join('\n')
-
-                    // Guardar cambios
-                    writeFile file: csvPath, text: nuevoCsv
-                    echo "Archivo actualizado:\n${nuevoCsv}"
                 }
             }
+
+        } catch (e) {
+            echo "❌ ERROR: ${e}"
         }
     }
 }
