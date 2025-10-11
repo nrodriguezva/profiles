@@ -1,50 +1,81 @@
 pipeline {
     agent any
-    parameters {
-        string(name: 'JBOSS_CONTROLLER', defaultValue: 'saos101ea05:9990', description: 'Dirección del controller JBoss')
-        string(name: 'SERVER_GROUP', defaultValue: 'main-server-group', description: 'Server group donde están las apps')
+
+    environment {
+        JBOSS_HOME = "/opt/jboss-eap-7.3"
+        JBOSS_USER = "jboss"
+        CONTROLLER = "remote+http://saos101ea05:9990"
     }
 
     stages {
-        stage('Obtener estado de las aplicaciones') {
+        stage('Obtener estado de aplicaciones en JBoss') {
             steps {
                 script {
-                    // Ejecutamos el comando en bash
-                    def output = sh(
+                    echo "📡 Consultando aplicaciones desde el Domain Controller..."
+
+                    // Ejecutar comando jboss-cli con salida en JSON
+                    def rawJson = sh(
                         script: """
-                            sudo -u jboss /opt/jboss-eap-7.3/bin/jboss-cli.sh --connect \
-                            --controller=remote+http://${params.JBOSS_CONTROLLER} \
-                            --command="/server-group=${params.SERVER_GROUP}/deployment=* :read-attribute(name=enabled)"
+                            sudo -u ${JBOSS_USER} ${JBOSS_HOME}/bin/jboss-cli.sh \\
+                            --connect \\
+                            --controller=${CONTROLLER} \\
+                            --output-json \\
+                            --command="/server-group=*:read-children-resources(child-type=deployment)"
                         """,
                         returnStdout: true
                     ).trim()
 
-                    echo "Resultado CLI:\n${output}"
+                    echo "🧾 Resultado crudo del CLI:"
+                    echo rawJson.take(400) + (rawJson.size() > 400 ? "..." : "")
 
-                    // Creamos un mapa vacío
-                    def appsStatus = [:]
+                    // Parsear el JSON
+                    def json = new groovy.json.JsonSlurper().parseText(rawJson)
 
-                    // Extraemos solo las líneas con resultados tipo "nombre.war => true/false"
-                    output.eachLine { line ->
-                        def matcher = line =~ /"(.+\.war)"\s*=>\s*(true|false)/
-                        if (matcher) {
-                            def appName = matcher[0][1]
-                            def status = matcher[0][2].toBoolean()
-                            appsStatus[appName] = status
+                    if (json.outcome != "success") {
+                        error("❌ Falló la ejecución del comando CLI: ${json['failure-description']}")
+                    }
+
+                    // Recorrer resultados
+                    def aplicaciones = []
+                    json.result.each { serverGroup, deployments ->
+                        deployments.each { appName, props ->
+                            def estado = props['enabled'] ?: false
+                            aplicaciones << [
+                                grupo: serverGroup,
+                                nombre: appName,
+                                habilitada: estado
+                            ]
                         }
                     }
 
-                    echo "Mapa de aplicaciones y su estado:\n${appsStatus}"
-
-                    // Ejemplo: mostrar solo las que están caídas
-                    def caidas = appsStatus.findAll { k, v -> v == false }
-                    if (caidas) {
-                        echo "⚠️ Aplicaciones caídas: ${caidas.keySet()}"
+                    if (aplicaciones.isEmpty()) {
+                        echo "⚠️ No se encontraron aplicaciones desplegadas en los grupos."
                     } else {
-                        echo "✅ Todas las aplicaciones están activas."
+                        echo "📋 Listado de aplicaciones encontradas:"
+                        aplicaciones.each {
+                            echo "- ${it.nombre} | Grupo: ${it.grupo} | Estado: ${it.habilitada ? '🟢 Activa' : '🔴 Inactiva'}"
+                        }
+
+                        // Mostrar resumen de inactivas
+                        def inactivas = aplicaciones.findAll { !it.habilitada }
+                        if (inactivas) {
+                            echo "\n⚠️ Aplicaciones inactivas detectadas:"
+                            inactivas.each { echo "- ${it.nombre} (${it.grupo})" }
+                        } else {
+                            echo "\n✅ Todas las aplicaciones están activas."
+                        }
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline finalizado correctamente."
+        }
+        failure {
+            echo "❌ Error durante la ejecución del pipeline."
         }
     }
 }
