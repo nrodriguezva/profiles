@@ -69,7 +69,9 @@ pipeline {
             }
         }
     }
-$JBOSS_HOME/bin/jboss-cli.sh --connect --command="/host=*/server=*/:read-resource(include-runtime=true, recursive=false)" \
+/host=*/server=*/:read-attribute(name=server-group)
+
+    $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/host=*/server=*/:read-resource(include-runtime=true, recursive=false)" \
 | grep -E 'host =>|server =>|server-group =>' \
 | awk '
     /host =>/ {host=$3}
