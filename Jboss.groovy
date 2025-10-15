@@ -69,6 +69,19 @@ pipeline {
             }
         }
     }
+$JBOSS_HOME/bin/jboss-cli.sh --connect --command="/host=*/server=*/:read-resource(include-runtime=true, recursive=false)" \
+| grep -E 'host =>|server =>|server-group =>' \
+| awk '
+    /host =>/ {host=$3}
+    /server =>/ {server=$3}
+    /server-group =>/ {
+        group=$3
+        gsub(/\"|,/, "", host)
+        gsub(/\"|,/, "", server)
+        gsub(/\"|,/, "", group)
+        printf "%-25s | %-15s | %-15s\n", group, host, server
+    }' \
+| sort | uniq
 
     post {
         success {
