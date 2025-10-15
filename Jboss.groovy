@@ -94,3 +94,11 @@ pipeline {
         }
     }
 }
+
+import groovy.json.JsonOutput
+def jsonText = JsonOutput.toJson(data)
+echo jsonText
+
+
+
+
