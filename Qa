@@ -26,3 +26,6 @@ El QA Engineer es responsable de garantizar que los productos de software cumpla
 ---
 
 ¿Deseas este mismo perfil enfocado en pruebas automatizadas (QA Automation) o para un entorno DevOps/testing continuo? También puedo adaptarlo para un CV, descripción de puesto o publicación de vacante.
+Djavax.net.ssl.trustStore="C:\Program Files\Eclipse Adoptium\jdk-17\lib\security\cacerts" ^
+ -Djavax.net.ssl.trustStorePassword=changeit ^
+ -Dhttp.proxyHost=PROXY_HOST ^
