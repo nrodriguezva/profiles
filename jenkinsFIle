@@ -1,40 +1,47 @@
-pipeline {
-  agent any
-  stages {
-    stage('TEA via Docker expect') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'tea-creds', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')]) {
-          script {
-            docker.image('ubuntu:22.04').inside {
-              sh '''
-                apt-get update && apt-get install -y expect openssh-client >/dev/null
-                cat > /tmp/ssh_tea_expect.exp <<'EOF'
-                #!/usr/bin/expect -f
-                set timeout 30
-                set host "10.171.183.76"
-                set port "10608"
-                set user "$env(SSH_USER)"
-                set pass "$env(SSH_PASS)"
-                set cmds [list "list users" "exit"]
-                spawn ssh -p $port -o StrictHostKeyChecking=no -o PasswordAuthentication=yes $user@$host
-                expect {
-                  -re "Are you sure you want to continue connecting.*" { send "yes\r"; exp_continue }
-                  -re "(P|p)assword:" { send "$pass\r" }
-                }
-                expect { -re "TEA> $|TEA>.*|\\$ $|# $" {} timeout {} }
-                foreach c $cmds {
-                  send "$c\r"
-                  expect { -re "TEA> $|TEA>.*|\\$ $|# $" {} timeout {} }
-                }
-                expect eof
-                EOF
-                chmod +x /tmp/ssh_tea_expect.exp
-                /tmp/ssh_tea_expect.exp
-              '''
-            }
-          }
-        }
-      }
-    }
-  }
-}
+flowchart LR
+
+%% Pools
+subgraph U[Pool: Usuario]
+    U1([Start])
+    U2[Enviar solicitud vía Teams]
+    U3([End])
+end
+
+subgraph P[Pool: Plataforma IA & Operaciones]
+
+    subgraph C[Lane: Chatbot / LLM]
+        C1[Recibir mensaje]
+        C2[Interpretar intención (LLMaaS)]
+        G1{¿Requiere acción?}
+        C3[Generar respuesta]
+    end
+
+    subgraph A[Lane: AIOps - Dynatrace]
+        A1[Consultar métricas y eventos]
+        A2[Detectar anomalías]
+        A3[Root Cause Analysis]
+    end
+
+    subgraph I[Lane: ITSM & Gobierno]
+        I1[Validar permisos\nMyAccess]
+        I2[Registrar / Actualizar incidente\nServiceNow]
+    end
+
+    subgraph O[Lane: Orquestación]
+        O1[Ejecutar pipeline\nJenkins]
+        O2[Aplicar acción correctiva]
+    end
+
+    subgraph K[Lane: Conocimiento]
+        K1[Consultar documentación\nSharePoint]
+    end
+end
+
+%% Flow
+U1 --> U2 --> C1
+C1 --> C2 --> G1
+
+G1 -- No --> K1 --> C3
+G1 -- Sí --> A1 --> A2 --> A3 --> I1 --> I2 --> O1 --> O2 --> C3
+
+C3 --> U3
