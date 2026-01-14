@@ -1,47 +1,71 @@
-flowchart LR
+<mxfile host="app.diagrams.net">
+  <diagram name="BPMN - Chatbot AIOps">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
 
-%% Pools
-subgraph U[Pool: Usuario]
-    U1([Start])
-    U2[Enviar solicitud vía Teams]
-    U3([End])
-end
+        <!-- Pool Usuario -->
+        <mxCell id="U" value="Pool: Usuario" style="swimlane;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="220" height="500" as="geometry"/>
+        </mxCell>
 
-subgraph P[Pool: Plataforma IA & Operaciones]
+        <mxCell id="U1" value="Start" style="ellipse;" vertex="1" parent="U">
+          <mxGeometry x="60" y="60" width="40" height="40" as="geometry"/>
+        </mxCell>
 
-    subgraph C[Lane: Chatbot / LLM]
-        C1[Recibir mensaje]
-        C2[Interpretar intención (LLMaaS)]
-        G1{¿Requiere acción?}
-        C3[Generar respuesta]
-    end
+        <mxCell id="U2" value="Enviar solicitud&#10;vía Teams" style="rounded=1;" vertex="1" parent="U">
+          <mxGeometry x="40" y="130" width="140" height="60" as="geometry"/>
+        </mxCell>
 
-    subgraph A[Lane: AIOps - Dynatrace]
-        A1[Consultar métricas y eventos]
-        A2[Detectar anomalías]
-        A3[Root Cause Analysis]
-    end
+        <mxCell id="U3" value="End" style="ellipse;" vertex="1" parent="U">
+          <mxGeometry x="60" y="220" width="40" height="40" as="geometry"/>
+        </mxCell>
 
-    subgraph I[Lane: ITSM & Gobierno]
-        I1[Validar permisos\nMyAccess]
-        I2[Registrar / Actualizar incidente\nServiceNow]
-    end
+        <!-- Pool Plataforma -->
+        <mxCell id="P" value="Pool: Plataforma IA &amp; Operaciones" style="swimlane;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="20" width="900" height="500" as="geometry"/>
+        </mxCell>
 
-    subgraph O[Lane: Orquestación]
-        O1[Ejecutar pipeline\nJenkins]
-        O2[Aplicar acción correctiva]
-    end
+        <!-- Lanes -->
+        <mxCell id="C" value="Chatbot / LLM" style="swimlane;" vertex="1" parent="P">
+          <mxGeometry x="0" y="0" width="900" height="100" as="geometry"/>
+        </mxCell>
 
-    subgraph K[Lane: Conocimiento]
-        K1[Consultar documentación\nSharePoint]
-    end
-end
+        <mxCell id="A" value="AIOps - Dynatrace" style="swimlane;" vertex="1" parent="P">
+          <mxGeometry x="0" y="100" width="900" height="100" as="geometry"/>
+        </mxCell>
 
-%% Flow
-U1 --> U2 --> C1
-C1 --> C2 --> G1
+        <mxCell id="I" value="ITSM &amp; Gobierno" style="swimlane;" vertex="1" parent="P">
+          <mxGeometry x="0" y="200" width="900" height="100" as="geometry"/>
+        </mxCell>
 
-G1 -- No --> K1 --> C3
-G1 -- Sí --> A1 --> A2 --> A3 --> I1 --> I2 --> O1 --> O2 --> C3
+        <mxCell id="O" value="Orquestación" style="swimlane;" vertex="1" parent="P">
+          <mxGeometry x="0" y="300" width="900" height="100" as="geometry"/>
+        </mxCell>
 
-C3 --> U3
+        <!-- Tasks -->
+        <mxCell id="C1" value="Interpretar intención&#10;(LLMaaS)" style="rounded=1;" vertex="1" parent="C">
+          <mxGeometry x="40" y="30" width="160" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="G1" value="¿Requiere acción?" style="rhombus;" vertex="1" parent="C">
+          <mxGeometry x="240" y="30" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="A1" value="RCA / Análisis&#10;Dynatrace" style="rounded=1;" vertex="1" parent="A">
+          <mxGeometry x="420" y="30" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="I1" value="Validar permisos&#10;MyAccess" style="rounded=1;" vertex="1" parent="I">
+          <mxGeometry x="640" y="30" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="O1" value="Ejecutar pipeline&#10;Jenkins" style="rounded=1;" vertex="1" parent="O">
+          <mxGeometry x="840" y="30" width="180" height="50" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
