@@ -1,4 +1,5 @@
 https://adoptium.net/en-GB/temurin/releases?version=21
+https://adoptium.net/en-GB/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin21-binaries%2Freleases%2Fdownload%2Fjdk-21.0.10%252B7%2FOpenJDK21U-jdk_x64_linux_hotspot_21.0.10_7.tar.gz&vendor=Adoptium
 Aquí tienes un comparativo claro entre **Sonatype Nexus Repository Community Edition (CE)** —la versión gratuita mejorada— y la versión paga **Pro**, basado en información actualizada hasta julio de 2025:
 
 ---
