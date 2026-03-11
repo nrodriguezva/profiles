@@ -1,3 +1,4 @@
+https://adoptium.net/en-GB/temurin/releases?version=21
 Aquí tienes un comparativo claro entre **Sonatype Nexus Repository Community Edition (CE)** —la versión gratuita mejorada— y la versión paga **Pro**, basado en información actualizada hasta julio de 2025:
 
 ---
