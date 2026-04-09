@@ -1,0 +1,123 @@
+pipeline {
+    agent any
+
+    // Se ejecuta cada minuto, en UTC (Jenkins generalmente corre en UTC)
+    // Chile (America/Santiago) es UTC-3 en verano, UTC-4 en invierno
+    // El pipeline se dispara cada minuto y compara internamente con hora Chile
+    triggers {
+        cron('* * * * *')
+    }
+
+    environment {
+        TZ = 'UTC'
+        CSV_PATH = "${WORKSPACE}/jobs_schedule.csv"
+        DATASTAGE_SERVER = 'tu-servidor-datastage'  // Cambia esto
+    }
+
+    stages {
+
+        stage('Leer CSV y filtrar jobs de esta hora') {
+            steps {
+                script {
+                    // Obtener hora actual en zona horaria de Chile
+                    def horaChile = sh(
+                        script: "TZ='America/Santiago' date '+%H:%M'",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Hora actual en Chile: ${horaChile}"
+
+                    // Leer el CSV y buscar jobs que coincidan con la hora actual
+                    def jobsParaEjecutar = []
+                    def csvContent = readFile(env.CSV_PATH).trim()
+
+                    csvContent.split('\n').drop(1).each { linea ->  // drop(1) salta el header
+                        linea = linea.trim()
+                        if (!linea) return
+
+                        def partes = linea.split(',')
+                        if (partes.size() < 3) return
+
+                        def nombreJob     = partes[0].trim()
+                        def nombreProyecto = partes[1].trim()
+                        def horaJob       = partes[2].trim()
+
+                        if (horaJob == horaChile) {
+                            jobsParaEjecutar << [
+                                job:      nombreJob,
+                                proyecto: nombreProyecto,
+                                hora:     horaJob
+                            ]
+                        }
+                    }
+
+                    if (jobsParaEjecutar.isEmpty()) {
+                        echo "No hay jobs programados para las ${horaChile}. Pipeline finaliza."
+                        currentBuild.result = 'SUCCESS'
+                        return
+                    }
+
+                    echo "Jobs a ejecutar a las ${horaChile}:"
+                    jobsParaEjecutar.each { j ->
+                        echo "  - ${j.job} (Proyecto: ${j.proyecto})"
+                    }
+
+                    // Guardar la lista para el siguiente stage
+                    env.JOBS_JSON = groovy.json.JsonOutput.toJson(jobsParaEjecutar)
+                }
+            }
+        }
+
+        stage('Ejecutar Jobs DataStage') {
+            when {
+                expression { env.JOBS_JSON && env.JOBS_JSON != '[]' }
+            }
+            steps {
+                script {
+                    def jobs = new groovy.json.JsonSlurper().parseText(env.JOBS_JSON)
+
+                    // Ejecutar todos los jobs en paralelo
+                    def parallelStages = [:]
+
+                    jobs.each { jobInfo ->
+                        def jobNombre   = jobInfo.job
+                        def jobProyecto = jobInfo.proyecto
+
+                        parallelStages["${jobProyecto}/${jobNombre}"] = {
+                            stage("Ejecutar ${jobNombre}") {
+                                echo "Iniciando: dsjob -run ${jobProyecto} ${jobNombre}"
+
+                                def resultado = sh(
+                                    script: """
+                                        dsjob -server ${env.DATASTAGE_SERVER} \
+                                              -run ${jobProyecto} ${jobNombre}
+                                        echo "Exit code: \$?"
+                                    """,
+                                    returnStatus: true
+                                )
+
+                                if (resultado == 0) {
+                                    echo "✅ ${jobNombre} completado exitosamente"
+                                } else {
+                                    error "❌ ${jobNombre} falló con código: ${resultado}"
+                                }
+                            }
+                        }
+                    }
+
+                    parallel parallelStages
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "⚠️ Uno o más jobs DataStage fallaron. Revisar logs."
+            // Aquí puedes agregar notificaciones: email, Slack, Teams, etc.
+        }
+        success {
+            echo "✅ Ejecución completada."
+        }
+    }
+}
