@@ -1,68 +1,75 @@
 pipeline {
     agent any
 
-    // Se ejecuta cada minuto, en UTC (Jenkins generalmente corre en UTC)
-    // Chile (America/Santiago) es UTC-3 en verano, UTC-4 en invierno
-    // El pipeline se dispara cada minuto y compara internamente con hora Chile
     triggers {
         cron('* * * * *')
     }
 
     environment {
-        TZ = 'UTC'
-        CSV_PATH = "${WORKSPACE}/jobs_schedule.csv"
-        DATASTAGE_SERVER = 'tu-servidor-datastage'  // Cambia esto
+        DATASTAGE_SERVER = 'tu-servidor-datastage'
+        CSV_PATH         = "${WORKSPACE}/jobs_schedule.csv"
     }
 
     stages {
 
-        stage('Leer CSV y filtrar jobs de esta hora') {
+        stage('Capturar hora de inicio') {
             steps {
                 script {
-                    // Obtener hora actual en zona horaria de Chile
-                    def horaChile = sh(
+                    // ✅ Se captura UNA SOLA VEZ al arrancar el pipeline.
+                    // Aunque los stages siguientes tarden, siempre se
+                    // compara contra este valor fijo y no contra "ahora".
+                    env.HORA_INICIO_CHILE = sh(
                         script: "TZ='America/Santiago' date '+%H:%M'",
                         returnStdout: true
                     ).trim()
 
-                    echo "Hora actual en Chile: ${horaChile}"
+                    echo "⏰ Hora de inicio del pipeline (Chile): ${env.HORA_INICIO_CHILE}"
+                }
+            }
+        }
 
-                    // Leer el CSV y buscar jobs que coincidan con la hora actual
+        stage('Leer CSV y filtrar jobs') {
+            steps {
+                script {
+                    def horaInicio = env.HORA_INICIO_CHILE  // valor fijo, nunca cambia
                     def jobsParaEjecutar = []
+
                     def csvContent = readFile(env.CSV_PATH).trim()
 
-                    csvContent.split('\n').drop(1).each { linea ->  // drop(1) salta el header
+                    csvContent.split('\n').drop(1).each { linea ->
                         linea = linea.trim()
                         if (!linea) return
 
                         def partes = linea.split(',')
                         if (partes.size() < 3) return
 
-                        def nombreJob     = partes[0].trim()
+                        def nombreJob      = partes[0].trim()
                         def nombreProyecto = partes[1].trim()
-                        def horaJob       = partes[2].trim()
+                        def horasRaw       = partes[2].trim()
 
-                        if (horaJob == horaChile) {
+                        // ✅ Múltiples horas separadas por ";"
+                        def horas = horasRaw.split(';').collect { it.trim() }
+
+                        if (horas.contains(horaInicio)) {
                             jobsParaEjecutar << [
                                 job:      nombreJob,
                                 proyecto: nombreProyecto,
-                                hora:     horaJob
+                                horas:    horasRaw
                             ]
                         }
                     }
 
                     if (jobsParaEjecutar.isEmpty()) {
-                        echo "No hay jobs programados para las ${horaChile}. Pipeline finaliza."
-                        currentBuild.result = 'SUCCESS'
+                        echo "No hay jobs programados para las ${horaInicio}. Pipeline finaliza."
+                        env.JOBS_JSON = '[]'
                         return
                     }
 
-                    echo "Jobs a ejecutar a las ${horaChile}:"
+                    echo "Jobs a ejecutar a las ${horaInicio}:"
                     jobsParaEjecutar.each { j ->
-                        echo "  - ${j.job} (Proyecto: ${j.proyecto})"
+                        echo "  → ${j.job} (${j.proyecto}) | Horarios: ${j.horas}"
                     }
 
-                    // Guardar la lista para el siguiente stage
                     env.JOBS_JSON = groovy.json.JsonOutput.toJson(jobsParaEjecutar)
                 }
             }
@@ -76,7 +83,6 @@ pipeline {
                 script {
                     def jobs = new groovy.json.JsonSlurper().parseText(env.JOBS_JSON)
 
-                    // Ejecutar todos los jobs en paralelo
                     def parallelStages = [:]
 
                     jobs.each { jobInfo ->
@@ -85,21 +91,20 @@ pipeline {
 
                         parallelStages["${jobProyecto}/${jobNombre}"] = {
                             stage("Ejecutar ${jobNombre}") {
-                                echo "Iniciando: dsjob -run ${jobProyecto} ${jobNombre}"
+                                echo "▶ Iniciando: ${jobProyecto} / ${jobNombre}"
 
-                                def resultado = sh(
+                                def exitCode = sh(
                                     script: """
                                         dsjob -server ${env.DATASTAGE_SERVER} \
                                               -run ${jobProyecto} ${jobNombre}
-                                        echo "Exit code: \$?"
                                     """,
                                     returnStatus: true
                                 )
 
-                                if (resultado == 0) {
+                                if (exitCode == 0) {
                                     echo "✅ ${jobNombre} completado exitosamente"
                                 } else {
-                                    error "❌ ${jobNombre} falló con código: ${resultado}"
+                                    error "❌ ${jobNombre} falló con código de salida: ${exitCode}"
                                 }
                             }
                         }
@@ -113,11 +118,10 @@ pipeline {
 
     post {
         failure {
-            echo "⚠️ Uno o más jobs DataStage fallaron. Revisar logs."
-            // Aquí puedes agregar notificaciones: email, Slack, Teams, etc.
+            echo "⚠️ Uno o más jobs DataStage fallaron a las ${env.HORA_INICIO_CHILE}."
         }
         success {
-            echo "✅ Ejecución completada."
+            echo "✅ Pipeline de las ${env.HORA_INICIO_CHILE} finalizado correctamente."
         }
     }
 }
