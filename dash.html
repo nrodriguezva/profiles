@@ -1804,15 +1804,22 @@ function sw(id){
   styleTag.id = 'cap-theme-style';
   (document.head || document.querySelector('head') || document.documentElement).appendChild(styleTag);
 
-  // Tema: oscuro por defecto, toggle guarda en localStorage
-  var STORAGE_KEY = 'cap-dashboard-theme';
-  var _isDark;
-  try {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    _isDark = (saved === null) ? true : (saved === 'dark');
-  } catch(e) {
-    _isDark = true;
+  // Tema: oscuro por defecto, toggle guarda preferencia en cookie
+  function getCookie(name) {
+    try {
+      var match = document.cookie.match(new RegExp('(^| )'+name+'=([^;]+)'));
+      return match ? match[2] : null;
+    } catch(e) { return null; }
   }
+  function setCookie(name, value) {
+    try {
+      document.cookie = name+'='+value+';path=/;max-age=31536000;SameSite=Lax';
+    } catch(e) {}
+  }
+
+  var _isDark;
+  var _saved = getCookie('cap_theme');
+  _isDark = (_saved === null) ? true : (_saved === 'dark');
 
   function applyTheme(dark) {
     _isDark = dark;
@@ -1820,7 +1827,7 @@ function sw(id){
     var btn = document.getElementById('theme-toggle-btn');
     if (btn) btn.textContent = dark ? '☀️' : '🌙';
     el.setAttribute('data-theme', dark ? 'dark' : 'light');
-    try { localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light'); } catch(e) {}
+    setCookie('cap_theme', dark ? 'dark' : 'light');
   }
 
   window.toggleTheme = function() { applyTheme(!_isDark); };
