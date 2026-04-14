@@ -1805,62 +1805,51 @@ function sw(id){
   (document.head || document.querySelector('head') || document.documentElement).appendChild(styleTag);
 
   function detectDark() {
-    // Atlassian / Confluence theme.switcher=true usa estos atributos:
-    // <html data-color-mode="dark|light">
-    // <html data-theme="dark|light">
-    // <html class="dark-theme|light-theme">
-    // <body class="aui-page-... dark ...">
-    function checkEl(el) {
-      if (!el) return null;
-      var checks = [
-        el.getAttribute('data-color-mode'),
-        el.getAttribute('data-theme'),
-        el.getAttribute('data-ds-color-mode'),
-        el.getAttribute('data-atlaskit-theme'),
-      ];
-      for (var i = 0; i < checks.length; i++) {
-        var v = (checks[i]||'').toLowerCase();
-        if (v === 'dark' || v === 'night') return true;
-        if (v === 'light' || v === 'day')  return false;
-      }
-      var cls = (el.className||'').toLowerCase();
-      if (/dark/.test(cls) || cls.includes('dark-theme') || cls.includes('night')) return true;
-      if (/light/.test(cls) || cls.includes('light-theme')) return false;
+    // Confluence inyecta <style data-theme="dark|light|original">
+    // El que tiene contenido CSS es el tema activo
+    function checkStyleTags(doc) {
+      try {
+        var styles = doc.querySelectorAll('style[data-theme]');
+        var byTheme = {};
+        styles.forEach(function(s) {
+          byTheme[s.getAttribute('data-theme')] = s.textContent.trim().length;
+        });
+        // El activo es el que tiene contenido
+        if ((byTheme['dark']||0) > 0)    return true;
+        if ((byTheme['light']||0) > 0)   return false;
+        if ((byTheme['original']||0) > 0) return false;
+      } catch(e) {}
       return null;
     }
 
     var docs = [];
     try { docs.push(window.parent.document); } catch(e) {}
     try { docs.push(document); } catch(e) {}
-
     for (var d = 0; d < docs.length; d++) {
-      try {
-        var r = checkEl(docs[d].documentElement); // <html>
-        if (r !== null) return r;
-        r = checkEl(docs[d].body);                // <body>
-        if (r !== null) return r;
-      } catch(e) {}
+      var r = checkStyleTags(docs[d]);
+      if (r !== null) return r;
     }
-
-    // Fallback sistema operativo
     try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e) {}
     return true;
   }
 
-  // También observar el <html> además del <body>
   function observeAll() {
-    var targets = [];
-    try { targets.push(window.parent.document.documentElement, window.parent.document.body); } catch(e) {}
-    try { targets.push(document.documentElement, document.body); } catch(e) {}
-    targets.forEach(function(t) {
+    var docs = [];
+    try { docs.push(window.parent.document); } catch(e) {}
+    try { docs.push(document); } catch(e) {}
+    docs.forEach(function(doc) {
       try {
-        new MutationObserver(function() { applyTheme(detectDark()); })
-          .observe(t, {attributes: true,
-            attributeFilter: ['class','data-color-mode','data-theme',
-                              'data-ds-color-mode','data-atlaskit-theme']});
+        new MutationObserver(function() {
+          applyTheme(detectDark());
+        }).observe(doc.head || doc.documentElement, {
+          childList: true, subtree: true,
+          characterData: true, attributes: true,
+          attributeFilter: ['data-theme']
+        });
       } catch(e) {}
     });
   }
+
 
   var _isDark = detectDark();
 
@@ -1884,7 +1873,7 @@ function sw(id){
     });
   } catch(e) {}
 
-  // Log para debug — abrir consola en Confluence para ver qué detecta
+  // Log para debug
   try {
     var dbg = [];
     var _docs = [];
@@ -1892,15 +1881,13 @@ function sw(id){
     try { _docs.push({label:'local',  doc: document}); } catch(e) {}
     _docs.forEach(function(d) {
       try {
-        var h = d.doc.documentElement, b = d.doc.body;
-        dbg.push('[CAP-THEME] '+d.label+' html.class="'+(h.className||'')+'"');
-        dbg.push('[CAP-THEME] '+d.label+' html.data-color-mode="'+(h.getAttribute('data-color-mode')||'')+'"');
-        dbg.push('[CAP-THEME] '+d.label+' html.data-theme="'+(h.getAttribute('data-theme')||'')+'"');
-        dbg.push('[CAP-THEME] '+d.label+' body.class="'+(b.className||'')+'"');
-        dbg.push('[CAP-THEME] '+d.label+' body.data-color-mode="'+(b.getAttribute('data-color-mode')||'')+'"');
-      } catch(e) {}
+        var styles = d.doc.querySelectorAll('style[data-theme]');
+        styles.forEach(function(s) {
+          dbg.push('[CAP-THEME] '+d.label+' <style data-theme="'+s.getAttribute('data-theme')+'"> contentLen='+s.textContent.trim().length);
+        });
+      } catch(e) { dbg.push('[CAP-THEME] '+d.label+' error: '+e); }
     });
-    dbg.push('[CAP-THEME] Resultado detectDark(): '+detectDark());
+    dbg.push('[CAP-THEME] detectDark() = '+detectDark());
     console.log(dbg.join('\n'));
   } catch(e) {}
 })();
