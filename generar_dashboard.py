@@ -89,6 +89,15 @@ def safe_int(val):
 cfg_row = df_cfg[df_cfg.iloc[:, 0].astype(str).str.strip() == "lastUpdate"]
 last_update = cfg_row.iloc[0, 1].strip() if not cfg_row.empty else datetime.now().isoformat(timespec='seconds')
 
+logo_row = df_cfg[df_cfg.iloc[:, 0].astype(str).str.strip() == "logo_base64"]
+logo_b64 = ""
+if not logo_row.empty:
+    raw = logo_row.iloc[0, 1]
+    if raw is not None and str(raw).strip() not in ("", "nan"):
+        logo_b64 = str(raw).strip()
+        if not logo_b64.startswith("data:"):
+            logo_b64 = "data:image/png;base64," + logo_b64
+
 # ════════════════════════════════════════════════════════
 #  CONSTRUIR DATOS
 # ════════════════════════════════════════════════════════
@@ -212,8 +221,8 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .h-accent{width:5px;flex-shrink:0;background:linear-gradient(180deg,#595959 0%,#00915A 100%);}
 #cap-dashboard .h-content{flex:1;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;flex-wrap:wrap;gap:10px;}
 #cap-dashboard .h-left{display:flex;align-items:center;gap:14px;}
-#cap-dashboard .logo-slot{width:48px;height:48px;border-radius:8px;border:1.5px dashed #444444;background:#222222;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;cursor:pointer;transition:border-color .2s;}
-#cap-dashboard .logo-slot:hover{border-color:#00915A;}
+#cap-dashboard .logo-slot{width:48px;height:48px;border-radius:8px;border:1px solid #333333;background:#222222;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+
 #cap-dashboard .logo-slot img{width:100%;height:100%;object-fit:contain;}
 #cap-dashboard .logo-placeholder{font-size:8px;color:#555555;text-align:center;line-height:1.3;pointer-events:none;}
 #cap-dashboard .h-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1;}
@@ -337,8 +346,8 @@ HTML_TEMPLATE = r"""<style>
   <div class="h-accent"></div>
   <div class="h-content">
     <div class="h-left">
-      <div class="logo-slot" id="logo-slot" title="Clic para cargar logo">
-        <div class="logo-placeholder">LOGO<br>empresa</div>
+      <div class="logo-slot" id="logo-slot">
+        __LOGO_CONTENT__
       </div>
       <div>
         <div class="h-title">Gestión de Capacity e Iniciativas de Delivery</div>
@@ -531,19 +540,7 @@ function sw(id){
   document.querySelector('[data-tab="'+id+'"]').classList.add('active');
 }
 
-(function(){
-  const slot=document.getElementById('logo-slot');
-  const inp=document.createElement('input');
-  inp.type='file';inp.accept='image/*';inp.style.display='none';
-  document.body.appendChild(inp);
-  slot.onclick=()=>inp.click();
-  inp.onchange=()=>{
-    const file=inp.files[0];if(!file)return;
-    const reader=new FileReader();
-    reader.onload=e=>{slot.innerHTML=`<img src="${e.target.result}" alt="Logo">`;};
-    reader.readAsDataURL(file);
-  };
-})();
+
 
 renderAll(DATA);
 </script>
@@ -553,7 +550,14 @@ renderAll(DATA);
 #  GENERAR HTML
 # ════════════════════════════════════════════════════════
 data_json = json.dumps(DATA, ensure_ascii=False, indent=2)
+# Build logo content
+if logo_b64:
+    logo_content = f'<img src="{logo_b64}" alt="Logo empresa" style="width:100%;height:100%;object-fit:contain;">'
+else:
+    logo_content = '<div class="logo-placeholder">LOGO<br>empresa</div>'
+
 html_final = HTML_TEMPLATE.replace("__DATA_PLACEHOLDER__", data_json)
+html_final = html_final.replace("__LOGO_CONTENT__", logo_content)
 
 OUTPUT_PATH.write_text(html_final, encoding='utf-8')
 
