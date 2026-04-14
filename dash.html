@@ -1,0 +1,1857 @@
+<style>
+
+/* ── Tema oscuro (defecto) ── */
+#cap-dashboard {
+  --bg:      #111111; --surface:  #1A1A1A; --surface2: #222222;
+  --surface3:#2A2A2A; --border:   #333333; --border2:  #444444;
+  --text:    #F0F0F0; --muted:    #888888; --subtle:   #555555;
+  --primary: #00915A; --pdark:    #006B43; --pglow:    rgba(0,145,90,0.14);
+  --coral:   #EF7B5B; --amber:    #E8A020; --sky:      #56B4C0;
+  --stok-bg: rgba(0,145,90,0.18);  --stok-t:  #00915A;
+  --swarn-bg:rgba(163,196,57,0.18);--swarn-t: #8aaa2e;
+  --scrit-bg:rgba(239,123,91,0.2); --scrit-t: #EF7B5B;
+}
+
+/* ── Tema claro — Confluence en modo claro ── */
+@media (prefers-color-scheme: light) {
+  #cap-dashboard {
+    --bg:      #F4F5F7; --surface:  #FFFFFF; --surface2: #F0F1F3;
+    --surface3:#E8E9EB; --border:   #DFE1E6; --border2:  #C1C7D0;
+    --text:    #172B4D; --muted:    #5E6C84; --subtle:   #97A0AF;
+    --primary: #00915A; --pdark:    #006B43; --pglow:    rgba(0,145,90,0.10);
+    --coral:   #C9402A; --amber:    #B37400; --sky:      #0052CC;
+    --stok-bg: rgba(0,145,90,0.12);  --stok-t:  #006B43;
+    --swarn-bg:rgba(130,100,0,0.12); --swarn-t: #7A5000;
+    --scrit-bg:rgba(191,38,0,0.10);  --scrit-t: #BF2600;
+  }
+}
+
+/* ── Confluence activa modo oscuro con estas clases en el body ── */
+body.dark #cap-dashboard,
+body[data-color-mode="dark"] #cap-dashboard,
+body[class*="dark-mode"] #cap-dashboard,
+.dark #cap-dashboard {
+  --bg:      #111111; --surface:  #1A1A1A; --surface2: #222222;
+  --surface3:#2A2A2A; --border:   #333333; --border2:  #444444;
+  --text:    #F0F0F0; --muted:    #888888; --subtle:   #555555;
+}
+
+/* ── Confluence activa modo claro con estas clases ── */
+body.light #cap-dashboard,
+body[data-color-mode="light"] #cap-dashboard,
+body[class*="light-mode"] #cap-dashboard {
+  --bg:      #F4F5F7; --surface:  #FFFFFF; --surface2: #F0F1F3;
+  --surface3:#E8E9EB; --border:   #DFE1E6; --border2:  #C1C7D0;
+  --text:    #172B4D; --muted:    #5E6C84; --subtle:   #97A0AF;
+}
+
+/* ── BASE ── */
+#cap-dashboard *{box-sizing:border-box;margin:0;padding:0;}
+#cap-dashboard{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);border-radius:8px;overflow:hidden;width:100%;display:block;transition:background .3s,color .3s;}
+#cap-dashboard header{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;}
+#cap-dashboard .h-accent{width:5px;flex-shrink:0;background:linear-gradient(180deg,#595959 0%,var(--primary) 100%);}
+#cap-dashboard .h-content{flex:1;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;flex-wrap:wrap;gap:10px;}
+#cap-dashboard .h-left{display:flex;align-items:center;gap:14px;}
+#cap-dashboard .logo-slot{width:48px;height:48px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+#cap-dashboard .logo-slot img{width:100%;height:100%;object-fit:contain;}
+#cap-dashboard .logo-placeholder{font-size:8px;color:var(--subtle);text-align:center;line-height:1.3;pointer-events:none;}
+#cap-dashboard .h-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1;color:var(--text);}
+#cap-dashboard .h-sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
+#cap-dashboard .h-badge{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;}
+#cap-dashboard .live{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:blink 2s infinite;}
+#cap-dashboard .theme-toggle{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;transition:all .2s;}
+#cap-dashboard .theme-toggle:hover{border-color:var(--primary);color:var(--text);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#cap-dashboard .tabs{display:flex;gap:2px;padding:12px 32px 0;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+#cap-dashboard .tbtn{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--muted);background:transparent;border:none;cursor:pointer;padding:7px 14px;border-radius:5px 5px 0 0;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
+#cap-dashboard .tbtn:hover{color:var(--text);background:rgba(128,128,128,0.08);}
+#cap-dashboard .tbtn.active{color:var(--primary);border-bottom-color:var(--primary);background:var(--pglow);}
+#cap-dashboard .tbadge{display:inline-block;font-size:9px;font-weight:700;border-radius:10px;padding:1px 6px;margin-left:4px;vertical-align:middle;}
+#cap-dashboard .tbr{background:rgba(239,123,91,.22);color:var(--coral);}
+#cap-dashboard .tbg{background:var(--stok-bg);color:var(--primary);}
+#cap-dashboard main{padding:20px 32px 60px;max-width:1600px;margin:0 auto;background:var(--bg);}
+#cap-dashboard .tab-panel{display:none;}
+#cap-dashboard .tab-panel.active{display:block;animation:fu .2s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+#cap-dashboard .fbar{display:flex;align-items:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+#cap-dashboard .fl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:2px;}
+#cap-dashboard .fbtn{font-size:11px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:14px;padding:4px 12px;cursor:pointer;transition:all .14s;white-space:nowrap;font-family:'Inter',sans-serif;}
+#cap-dashboard .fbtn:hover{color:var(--text);border-color:var(--primary);}
+#cap-dashboard .fbtn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+#cap-dashboard .area-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+#cap-dashboard .area-nav-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--primary);}
+#cap-dashboard .nav-arrow{font-size:11px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;transition:all .14s;font-family:'Inter',sans-serif;}
+#cap-dashboard .nav-arrow:hover{color:var(--text);border-color:var(--primary);}
+#cap-dashboard .area-body{display:grid;grid-template-columns:220px 1fr 260px;gap:12px;align-items:start;}
+#cap-dashboard .left-panel{display:flex;flex-direction:column;gap:10px;}
+#cap-dashboard .lp-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;}
+#cap-dashboard .lp-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+#cap-dashboard .func-status{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+#cap-dashboard .func-label{font-size:13px;font-weight:600;color:var(--text);}
+#cap-dashboard .func-check{width:18px;height:18px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#fff;}
+#cap-dashboard .func-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+#cap-dashboard .kpi-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);}
+#cap-dashboard .kpi-row:last-child{border-bottom:none;}
+#cap-dashboard .kpi-name{font-size:11px;color:var(--muted);}
+#cap-dashboard .kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--text);}
+#cap-dashboard .kpi-total-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;margin-top:2px;}
+#cap-dashboard .kpi-total-name{font-size:11px;font-weight:600;color:var(--text);}
+#cap-dashboard .kpi-total-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--primary);}
+#cap-dashboard .kpi-note{font-size:9px;color:var(--subtle);line-height:1.4;margin-top:8px;}
+#cap-dashboard .cov-item{display:flex;align-items:flex-start;gap:7px;margin-bottom:8px;}
+#cap-dashboard .cov-icon{width:14px;height:14px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:8px;color:#fff;}
+#cap-dashboard .cov-text{font-size:11px;color:var(--muted);line-height:1.4;}
+#cap-dashboard .panel-header{background:var(--primary);border-radius:8px 8px 0 0;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+#cap-dashboard .panel-header-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;}
+#cap-dashboard .impact-pills{display:flex;gap:6px;}
+#cap-dashboard .ipill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;}
+#cap-dashboard .ipill-alto{background:#fff;color:#C9402A;}
+#cap-dashboard .ipill-medio{background:#fff;color:#B37400;}
+#cap-dashboard .ipill-bajo{background:#fff;color:#006B43;}
+#cap-dashboard .alerts-table{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;}
+#cap-dashboard .at-header{display:grid;grid-template-columns:36px 1fr 80px 160px 100px;background:var(--surface2);border-bottom:1px solid var(--border);}
+#cap-dashboard .at-header div{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);padding:7px 10px;}
+#cap-dashboard .alert-row{display:grid;grid-template-columns:36px 1fr 80px 160px 100px;border-bottom:1px solid var(--border);align-items:start;}
+#cap-dashboard .alert-row:last-child{border-bottom:none;}
+#cap-dashboard .alert-row:hover{background:var(--surface2);}
+#cap-dashboard .ar-icon{padding:14px 8px;display:flex;align-items:flex-start;justify-content:center;}
+#cap-dashboard .ar-desc{padding:12px 10px;}
+#cap-dashboard .ar-desc-title{font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);}
+#cap-dashboard .ar-desc-text{font-size:11px;color:var(--muted);line-height:1.5;}
+#cap-dashboard .ar-impact{padding:12px 10px;display:flex;align-items:flex-start;justify-content:center;}
+#cap-dashboard .impact-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;border:1.5px solid;white-space:nowrap;}
+#cap-dashboard .ib-alto{border-color:var(--coral);color:var(--coral);}
+#cap-dashboard .ib-medio{border-color:var(--amber);color:var(--amber);}
+#cap-dashboard .ib-bajo{border-color:var(--primary);color:var(--primary);}
+#cap-dashboard .ar-plan{padding:12px 10px;font-size:11px;color:var(--muted);line-height:1.5;}
+#cap-dashboard .ar-resp{padding:12px 10px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;}
+#cap-dashboard .resp-text{font-size:11px;color:var(--muted);}
+#cap-dashboard .quarter-badge{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;background:var(--pdark);color:#fff;padding:3px 10px;border-radius:5px;letter-spacing:1px;}
+#cap-dashboard .right-panel{display:flex;flex-direction:column;gap:10px;}
+#cap-dashboard .rp-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+#cap-dashboard .rp-header{background:var(--surface2);padding:9px 14px;border-bottom:1px solid var(--border);}
+#cap-dashboard .rp-header-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text);}
+#cap-dashboard .rp-body{padding:12px 14px;}
+#cap-dashboard .rp-tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+#cap-dashboard .tag-green{background:var(--primary);color:#fff;}
+#cap-dashboard .tag-gray{background:var(--surface3);color:var(--muted);border:1px solid var(--border2);}
+#cap-dashboard .rp-text{font-size:11px;color:var(--muted);line-height:1.6;}
+#cap-dashboard .rp-text li{margin-left:12px;margin-top:3px;}
+#cap-dashboard .rp-section{margin-bottom:10px;}
+#cap-dashboard .rp-section:last-child{margin-bottom:0;}
+#cap-dashboard .alist{display:flex;flex-direction:column;gap:8px;}
+#cap-dashboard .aitem{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--coral);border-radius:0 8px 8px 0;padding:13px 15px;display:flex;gap:11px;align-items:flex-start;}
+#cap-dashboard .aitem.warn{border-left-color:var(--amber);}
+#cap-dashboard .aitem.info{border-left-color:var(--sky);}
+#cap-dashboard .asev{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:8px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+#cap-dashboard .sc{background:var(--scrit-bg);color:var(--scrit-t);}
+#cap-dashboard .sw{background:var(--swarn-bg);color:var(--swarn-t);}
+#cap-dashboard .si2{background:rgba(86,180,192,.15);color:var(--sky);}
+#cap-dashboard .abody{flex:1;}
+#cap-dashboard .atitle{font-size:12px;font-weight:600;margin-bottom:3px;color:var(--text);}
+#cap-dashboard .adesc{font-size:11px;color:var(--muted);line-height:1.5;}
+#cap-dashboard .atags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+#cap-dashboard .atag{font-size:9px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;color:var(--muted);}
+#cap-dashboard .adate{font-size:9px;color:var(--subtle);margin-top:3px;}
+#cap-dashboard .clist{display:flex;flex-direction:column;gap:8px;}
+#cap-dashboard .citem{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px 15px;display:flex;gap:13px;align-items:flex-start;}
+#cap-dashboard .cnum{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--primary);flex-shrink:0;min-width:28px;}
+#cap-dashboard .cbody{flex:1;}
+#cap-dashboard .ctitle2{font-size:12px;font-weight:600;margin-bottom:3px;color:var(--text);}
+#cap-dashboard .cdesc{font-size:11px;color:var(--muted);line-height:1.5;}
+#cap-dashboard .cfoot{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;}
+#cap-dashboard .csbadge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:8px;}
+#cap-dashboard .cp{background:rgba(86,180,192,.18);color:var(--sky);}
+#cap-dashboard .cd{background:var(--stok-bg);color:var(--primary);}
+#cap-dashboard .ce{background:var(--swarn-bg);color:var(--amber);}
+#cap-dashboard .cl{background:rgba(186,48,117,.18);color:#BA3075;}
+#cap-dashboard .cmeta2{font-size:10px;color:var(--muted);}
+#cap-dashboard .st-ok{background:var(--stok-bg);color:var(--stok-t);}
+#cap-dashboard .st-warn{background:var(--swarn-bg);color:var(--swarn-t);}
+#cap-dashboard .st-crit{background:var(--scrit-bg);color:var(--scrit-t);}
+#cap-dashboard .lbox{text-align:center;padding:50px 20px;color:var(--muted);font-size:12px;}
+@media(max-width:900px){#cap-dashboard .area-body{grid-template-columns:1fr;}#cap-dashboard .at-header,#cap-dashboard .alert-row{grid-template-columns:32px 1fr 70px;}#cap-dashboard .at-header div:nth-child(4),#cap-dashboard .at-header div:nth-child(5),#cap-dashboard .alert-row .ar-plan,#cap-dashboard .alert-row .ar-resp{display:none;}}
+@media(max-width:600px){#cap-dashboard .h-content,#cap-dashboard .tabs,#cap-dashboard main{padding-left:14px;padding-right:14px;}}
+<div id="cap-dashboard">
+<header>
+  <div class="h-accent"></div>
+  <div class="h-content">
+    <div class="h-left">
+      <div class="logo-slot" id="logo-slot">
+        <div class="logo-placeholder">LOGO<br>empresa</div>
+      </div>
+      <div>
+        <div class="h-title">Gestión de Capacity e Iniciativas de Delivery</div>
+        <div class="h-sub">Capacity por país y área · Comités &amp; Compromisos</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+      <div class="h-badge">
+        <span class="live"></span>
+        <span id="lupd">--</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tbtn active" data-tab="cap" onclick="sw('cap')">Estado General por Área</button>
+  <button class="tbtn" data-tab="alt" onclick="sw('alt')">Alertas Comité <span class="tbadge tbr" id="ba">–</span></button>
+  <button class="tbtn" data-tab="com" onclick="sw('com')">Compromisos <span class="tbadge tbg" id="bc">–</span></button>
+</div>
+<main>
+  <div class="tab-panel active" id="tab-cap">
+    <div class="fbar" id="fbar"><span class="fl">Área:</span></div>
+    <div id="area-detail"><div class="lbox">Cargando…</div></div>
+  </div>
+  <div class="tab-panel" id="tab-alt">
+    <div class="alist" id="alist"></div>
+  </div>
+  <div class="tab-panel" id="tab-com">
+    <div class="clist" id="clist"></div>
+  </div>
+</main>
+</div>
+<script>
+(function(){
+  var l=document.createElement('link');
+  l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800&display=swap';
+  document.head&&document.head.appendChild(l)||(document.querySelector('head')||document.documentElement).appendChild(l);
+})();
+const DATA = {
+  "lastUpdate": "2025-04-13T09:00:00",
+  "areas": [
+    {
+      "id": "datacenter",
+      "name": "DATACENTER & HCI",
+      "funcionalidad": "Estable",
+      "funcDesc": "Infraestructura de datacenter y HCI operando con cobertura regional.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 14
+        },
+        {
+          "n": "Change",
+          "v": 89
+        },
+        {
+          "n": "Incidentes",
+          "v": 41
+        }
+      ],
+      "kpiNote": "Solicitudes atendidas dentro de los tiempos establecidos.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "38",
+        "99.8% Ene · 99.9% Feb · 100% Mar",
+        "8 clústeres HCI PRD"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 8,
+          "total": 12,
+          "status": "ok",
+          "role": "Infra Engineer",
+          "lead": "Carlos M."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 3,
+          "total": 8,
+          "status": "warn",
+          "role": "HCI Specialist",
+          "lead": "Valeria R."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 10,
+          "total": 14,
+          "status": "ok",
+          "role": "Datacenter Arch",
+          "lead": "Andrés F."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 2,
+          "total": 10,
+          "status": "crit",
+          "role": "Infra Engineer",
+          "lead": "Laura G."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 5,
+          "total": 6,
+          "status": "ok",
+          "role": "Storage Admin",
+          "lead": "José Q."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 4,
+          "total": 5,
+          "status": "ok",
+          "role": "Regional Lead",
+          "lead": "Patricia V."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Saturación de storage en Mexico",
+          "desc": "Los pools de almacenamiento del HCI en Mexico alcanzan el 87% de capacidad.",
+          "impacto": "Alto",
+          "plan": "Expansión de licencias vSAN\nRevisión de políticas de retención",
+          "resp": "Datacenter",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Renovación de licencias HCI",
+          "desc": "Vencimiento de licencias VMware en Chile en los próximos 60 días.",
+          "impacto": "Medio",
+          "plan": "Gestión contractual con proveedor\nEvaluación de alternativas open source",
+          "resp": "Datacenter",
+          "eta": "Q2"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Migración exitosa de clúster primario en Colombia a nueva versión HCI.",
+          "Reducción del 15% en incidentes de infraestructura vs Q1 2024."
+        ],
+        "proyectos": [
+          "Proyecto de consolidación de datacenter Mexico-Latam: ETA Q3.",
+          "Evaluación de solución HCI Nutanix para Brasil."
+        ],
+        "otros": [
+          "Pendiente ingreso de 2 recursos en Mexico. 1 Infra Senior · 1 Storage Admin. ETA: Mayo."
+        ]
+      }
+    },
+    {
+      "id": "databases",
+      "name": "DATABASES",
+      "funcionalidad": "Estable",
+      "funcDesc": "Motores de base de datos operando en todos los países con monitoreo 24/7.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 9
+        },
+        {
+          "n": "Change",
+          "v": 54
+        },
+        {
+          "n": "Incidentes",
+          "v": 28
+        }
+      ],
+      "kpiNote": "Tiempos de respuesta dentro del SLA vigente.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "22",
+        "99.9% Ene · 99.9% Feb · 100% Mar",
+        "14 instancias PRD (Oracle/PG/SQL)"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 4,
+          "total": 8,
+          "status": "ok",
+          "role": "DBA Oracle",
+          "lead": "Ricardo S."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 1,
+          "total": 5,
+          "status": "crit",
+          "role": "DBA SQL Server",
+          "lead": "Miguel A."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 6,
+          "total": 9,
+          "status": "ok",
+          "role": "DBA PostgreSQL",
+          "lead": "Mónica H."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 3,
+          "total": 7,
+          "status": "warn",
+          "role": "DBA MySQL",
+          "lead": "Diego T."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 2,
+          "total": 4,
+          "status": "warn",
+          "role": "DBA Junior",
+          "lead": "Sonia P."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 3,
+          "total": 4,
+          "status": "ok",
+          "role": "Data Architect",
+          "lead": "Fernando L."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Capacidad mínima — Chile",
+          "desc": "1 DBA disponible de 5. Licencia médica prolongada pone en riesgo el SLA de bases de datos críticas.",
+          "impacto": "Alto",
+          "plan": "Reasignación temporal desde Colombia\nContratación urgente DBA SQL Server",
+          "resp": "Databases",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Versiones de motor fuera de soporte",
+          "desc": "3 instancias MySQL en Mexico con versión EOL detectadas en auditoría.",
+          "impacto": "Medio",
+          "plan": "Plan de actualización por ventanas de mantenimiento\nDocumentación de dependencias",
+          "resp": "Databases",
+          "eta": "Q2"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Implementación exitosa de réplicas de alta disponibilidad en Colombia.",
+          "Optimización de queries críticos: reducción 30% tiempo de respuesta."
+        ],
+        "proyectos": [
+          "Migración de Oracle a PostgreSQL en Perú: ETA Q3.",
+          "Implementación de backup automatizado cross-región."
+        ],
+        "otros": [
+          "Pendiente contratación DBA SQL Server para Chile. ETA incorporación: Junio."
+        ]
+      }
+    },
+    {
+      "id": "cloud",
+      "name": "CLOUD",
+      "funcionalidad": "Estable",
+      "funcDesc": "Servicios estables y disponibles con cobertura regional.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 7
+        },
+        {
+          "n": "Change",
+          "v": 132
+        },
+        {
+          "n": "Incidentes",
+          "v": 124
+        }
+      ],
+      "kpiNote": "Todas las solicitudes han sido atendidas y resueltas dentro de los tiempos establecidos.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "24",
+        "100% Ene · 99.9% Feb · 100% Mar",
+        "6 cuentas PRD"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 9,
+          "total": 12,
+          "status": "ok",
+          "role": "Cloud Architect",
+          "lead": "Ana C."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 4,
+          "total": 7,
+          "status": "ok",
+          "role": "AWS Engineer",
+          "lead": "Rodrigo M."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 7,
+          "total": 10,
+          "status": "ok",
+          "role": "GCP Specialist",
+          "lead": "Juliana B."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 2,
+          "total": 9,
+          "status": "crit",
+          "role": "Azure Engineer",
+          "lead": "Roberto N."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 3,
+          "total": 5,
+          "status": "ok",
+          "role": "Cloud Admin",
+          "lead": "Claudia E."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "Cloud Lead",
+          "lead": "Héctor J."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Alineación",
+          "desc": "Se requiere alineación de los equipos de desarrollo locales y regionales con las políticas DBC.",
+          "impacto": "Medio",
+          "plan": "Matrices RACI\nConstrucción base de conocimiento\nIngreso nuevas personas",
+          "resp": "Cloud",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Incremento en costos",
+          "desc": "Incremento costo IBM Cloud\nIncremento de costos por falta de análisis en configuración de servicios.",
+          "impacto": "Medio",
+          "plan": "Seguimiento en conjunto con FinOps.",
+          "resp": "Cloud",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Indisponibilidad",
+          "desc": "Indisponibilidad de los servicios por expiración de certificados y/o despliegues.",
+          "impacto": "Medio",
+          "plan": "Automatizaciones (Pipelines)\nAlertas proactivas de certificados",
+          "resp": "Cloud-ProdSec",
+          "eta": "Q3"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Actualización de catálogos y cuentas a Fibonacci y Galileo."
+        ],
+        "proyectos": [
+          "Move to Cloud: FactorIT inició trabajo de refactorización de 4 aplicaciones de COL y una de CHI. ETA: Q4.",
+          "COL solicitó nuevamente activación de cuentas y de servicios Cloud.",
+          "Migración cuenta WATSON COL para Enterprise Cloud Regional ETA: 31 Mayo."
+        ],
+        "otros": [
+          "Pendiente ingreso 3 recursos: 1 Líder · 1 arquitecto IBM · 1 Ingeniero Cloud. ETA: 6 Abril. Febrero se tuvo novedad de disponibilidad por actualización de aplicación CBR rules (2H)."
+        ]
+      }
+    },
+    {
+      "id": "openshift",
+      "name": "OpenShift On Premise",
+      "funcionalidad": "Estable",
+      "funcDesc": "Clústeres OCP on-premise operativos con alta disponibilidad en Colombia y Brasil.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 5
+        },
+        {
+          "n": "Change",
+          "v": 41
+        },
+        {
+          "n": "Incidentes",
+          "v": 19
+        }
+      ],
+      "kpiNote": "Sin incidentes críticos en producción durante el período.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "12",
+        "99.7% Ene · 100% Feb · 100% Mar",
+        "4 clústeres OCP PRD"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 3,
+          "total": 6,
+          "status": "warn",
+          "role": "OCP Engineer",
+          "lead": "Thiago O."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 1,
+          "total": 4,
+          "status": "crit",
+          "role": "OCP Admin",
+          "lead": "Pamela S."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 4,
+          "total": 6,
+          "status": "ok",
+          "role": "OCP Architect",
+          "lead": "Sebastián R."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 2,
+          "total": 5,
+          "status": "warn",
+          "role": "OCP Engineer",
+          "lead": "Martina F."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "K8s Admin",
+          "lead": "Luis C."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 1,
+          "total": 2,
+          "status": "warn",
+          "role": "OCP Lead",
+          "lead": "Alejandro V."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "OCP Admin único en Chile",
+          "desc": "1 de 4 OCP Admins disponibles. El único recurso no puede garantizar estabilidad del clúster de producción.",
+          "impacto": "Alto",
+          "plan": "Soporte remoto temporal desde Colombia\nContratación OCP Admin Chile",
+          "resp": "OpenShift",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Actualización de versión OCP",
+          "desc": "Clústeres en Mexico con versión 4.12 próxima a EOL. Actualización requerida antes de junio.",
+          "impacto": "Medio",
+          "plan": "Plan de actualización rolling\nValidación de workloads críticos previo upgrade",
+          "resp": "OpenShift",
+          "eta": "Q2"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Automatización de despliegues con GitOps en Colombia implementada.",
+          "Reducción del 20% en tiempos de deploy en ambientes productivos."
+        ],
+        "proyectos": [
+          "Expansión de clúster OCP a Perú: ETA Q3.",
+          "Implementación de Service Mesh (Istio) en Brasil."
+        ],
+        "otros": [
+          "Pendiente contratación OCP Admin para Chile. Entrevistas en curso. ETA: Mayo."
+        ]
+      }
+    },
+    {
+      "id": "telecom",
+      "name": "TELECOM",
+      "funcionalidad": "Estable",
+      "funcDesc": "Red de telecomunicaciones operando con redundancia en todos los países.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 11
+        },
+        {
+          "n": "Change",
+          "v": 67
+        },
+        {
+          "n": "Incidentes",
+          "v": 33
+        }
+      ],
+      "kpiNote": "Ventanas de mantenimiento ejecutadas sin impacto a producción.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "18",
+        "100% Ene · 100% Feb · 99.8% Mar",
+        "Cobertura VoIP regional activa"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 6,
+          "total": 9,
+          "status": "ok",
+          "role": "Network Engineer",
+          "lead": "Bruno T."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 3,
+          "total": 5,
+          "status": "ok",
+          "role": "Telecom Analyst",
+          "lead": "Cristina M."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 5,
+          "total": 8,
+          "status": "ok",
+          "role": "VoIP Specialist",
+          "lead": "Gabriel O."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 1,
+          "total": 7,
+          "status": "crit",
+          "role": "Network Arch",
+          "lead": "Elena P."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 4,
+          "total": 5,
+          "status": "ok",
+          "role": "Telecom Admin",
+          "lead": "Rodrigo A."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "Regional Telecom",
+          "lead": "Natalia K."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Déficit crítico Mexico — Red",
+          "desc": "1 de 7 Network Engineers disponibles. Riesgo en ventanas de mantenimiento programadas para Mayo.",
+          "impacto": "Alto",
+          "plan": "Soporte remoto desde Colombia\nPriorización de cambios críticos",
+          "resp": "Telecom",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Renovación enlaces MPLS",
+          "desc": "3 enlaces MPLS en Chile y Perú próximos a vencimiento de contrato.",
+          "impacto": "Medio",
+          "plan": "Negociación con carriers\nEvaluación de alternativas SD-WAN",
+          "resp": "Telecom",
+          "eta": "Q3"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Implementación SD-WAN en Colombia completada al 100%.",
+          "Reducción de latencia regional en 18%."
+        ],
+        "proyectos": [
+          "Expansión VoIP a oficinas secundarias Brasil: ETA Q3.",
+          "Evaluación SD-WAN para Mexico y Chile."
+        ],
+        "otros": [
+          "Pendiente ingreso 2 Network Engineers para Mexico. ETA: Junio."
+        ]
+      }
+    },
+    {
+      "id": "prodapp",
+      "name": "PRODUCCION APP",
+      "funcionalidad": "Estable",
+      "funcDesc": "Aplicaciones productivas operando con SLA cumplido en todos los países.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 22
+        },
+        {
+          "n": "Change",
+          "v": 198
+        },
+        {
+          "n": "Incidentes",
+          "v": 87
+        }
+      ],
+      "kpiNote": "Resolución de incidentes dentro de los tiempos acordados.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "46",
+        "99.9% Ene · 100% Feb · 100% Mar",
+        "Soporte L1/L2/L3 activo 24/7"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 11,
+          "total": 15,
+          "status": "ok",
+          "role": "App Support L2",
+          "lead": "Fernanda A."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 4,
+          "total": 7,
+          "status": "ok",
+          "role": "App Support L1",
+          "lead": "Ignacio S."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 8,
+          "total": 12,
+          "status": "ok",
+          "role": "App Engineer",
+          "lead": "Carolina G."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 3,
+          "total": 10,
+          "status": "warn",
+          "role": "Release Manager",
+          "lead": "Tomás H."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 5,
+          "total": 6,
+          "status": "ok",
+          "role": "App Admin",
+          "lead": "Yolanda B."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 3,
+          "total": 4,
+          "status": "ok",
+          "role": "Prod Lead",
+          "lead": "Ernesto C."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Reducción de capacidad Mexico",
+          "desc": "3 de 10 personas disponibles en Mexico. Riesgo en cobertura de releases programados para Q2.",
+          "impacto": "Medio",
+          "plan": "Distribución de cargas con Colombia\nRevisión del roadmap de releases",
+          "resp": "ProdApp",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Deuda técnica en módulos legacy",
+          "desc": "Detección de deuda técnica en módulos legacy de Brasil que generan incidentes recurrentes.",
+          "impacto": "Medio",
+          "plan": "Priorización de remediación técnica\nAsignación de sprints de deuda técnica",
+          "resp": "ProdApp",
+          "eta": "Q3"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Reducción del 25% en incidentes L1 mediante automatización de scripts.",
+          "Cero incidentes críticos en producción durante marzo."
+        ],
+        "proyectos": [
+          "Modernización módulos legacy Brasil: ETA Q4.",
+          "Implementación de observabilidad end-to-end en aplicaciones Colombia."
+        ],
+        "otros": [
+          "Evaluación de herramienta APM para monitoreo de aplicaciones en tiempo real."
+        ]
+      }
+    },
+    {
+      "id": "devsecops",
+      "name": "DEVSECOPS",
+      "funcionalidad": "Estable",
+      "funcDesc": "Pipelines de CI/CD y seguridad operando con cobertura en todos los países activos.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 100
+        },
+        {
+          "n": "Change",
+          "v": 178
+        },
+        {
+          "n": "Incidentes",
+          "v": 256
+        }
+      ],
+      "kpiNote": "Pipelines de seguridad ejecutados sin bloqueos críticos.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "16",
+        "Pipelines activos: 34 (CI/CD+SecScan)",
+        "Cobertura SAST/DAST activa"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 5,
+          "total": 8,
+          "status": "ok",
+          "role": "DevSecOps Eng",
+          "lead": "Leonardo F."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 2,
+          "total": 5,
+          "status": "warn",
+          "role": "Security Eng",
+          "lead": "Daniela M."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 6,
+          "total": 8,
+          "status": "ok",
+          "role": "DevOps Engineer",
+          "lead": "Nicolás V."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 1,
+          "total": 6,
+          "status": "crit",
+          "role": "Security Analyst",
+          "lead": "Isabel R."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 3,
+          "total": 4,
+          "status": "ok",
+          "role": "DevSecOps Jr",
+          "lead": "Álvaro D."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "Sec Lead",
+          "lead": "Camila O."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Cobertura mínima — Mexico Security",
+          "desc": "1 de 6 analistas disponibles. Vulnerabilidades abiertas sin atención en pipelines productivos.",
+          "impacto": "Alto",
+          "plan": "Soporte remoto Colombia para revisión de CVEs\nContratación Security Analyst Mexico",
+          "resp": "DevSecOps",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Vulnerabilidades pendientes — Chile",
+          "desc": "2 Security Engineers disponibles. Backlog de 14 vulnerabilidades medio-alto sin remediar.",
+          "impacto": "Medio",
+          "plan": "Priorización de CVEs críticos\nApoyo parcial desde Colombia",
+          "resp": "DevSecOps",
+          "eta": "Q2"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Implementación de SAST automático en 100% de repositorios Colombia.",
+          "Reducción del 40% en vulnerabilidades críticas vs Q1 2024."
+        ],
+        "proyectos": [
+          "Implementación DAST en pipelines Brazil: ETA Q3.",
+          "Integración con plataforma de gestión de secretos (Vault) en Colombia."
+        ],
+        "otros": [
+          "Pendiente contratación Security Analyst Mexico. ETA: Mayo."
+        ]
+      }
+    },
+    {
+      "id": "controltower",
+      "name": "Control Tower & Service Desk",
+      "funcionalidad": "Estable",
+      "funcDesc": "Torre de control y service desk operando 24/7 con cobertura en todos los países.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 48
+        },
+        {
+          "n": "Change",
+          "v": 221
+        },
+        {
+          "n": "Incidentes",
+          "v": 156
+        }
+      ],
+      "kpiNote": "FCR (First Contact Resolution) en 78%. Meta: 80%.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER, LATAM",
+        "52",
+        "100% Ene · 100% Feb · 100% Mar",
+        "L1/L2 en español, portugués e inglés"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 14,
+          "total": 18,
+          "status": "ok",
+          "role": "Service Desk L1",
+          "lead": "Renata C."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 6,
+          "total": 9,
+          "status": "ok",
+          "role": "Service Desk L2",
+          "lead": "Cristóbal P."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 10,
+          "total": 14,
+          "status": "ok",
+          "role": "Control Tower",
+          "lead": "Viviana L."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 7,
+          "total": 12,
+          "status": "ok",
+          "role": "Service Desk L1",
+          "lead": "Marco A."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 4,
+          "total": 6,
+          "status": "ok",
+          "role": "SD Analyst",
+          "lead": "Pilar E."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 3,
+          "total": 4,
+          "status": "ok",
+          "role": "Tower Lead",
+          "lead": "Gustavo F."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "FCR por debajo de meta",
+          "desc": "FCR actual 78% vs meta 80%. Causas: falta de documentación y escalaciones innecesarias.",
+          "impacto": "Medio",
+          "plan": "Actualización de knowledge base\nCapacitación agentes L1 en nuevos procedimientos",
+          "resp": "Control Tower",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Herramienta ITSM — actualización pendiente",
+          "desc": "ServiceNow con 2 actualizaciones de retraso. Impacto en funcionalidades de automatización.",
+          "impacto": "Bajo",
+          "plan": "Planificación de upgrade en ventana de mantenimiento\nValidación de impacto en integraciones",
+          "resp": "Control Tower",
+          "eta": "Q3"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Implementación de chatbot para atención L1 en Colombia: 22% de tickets resueltos automáticamente.",
+          "Reducción del tiempo promedio de resolución de 4.2h a 3.1h."
+        ],
+        "proyectos": [
+          "Expansión del chatbot a Brasil y Mexico: ETA Q3.",
+          "Implementación de CMDB actualizada cross-región."
+        ],
+        "otros": [
+          "Evaluación de herramienta de análisis de sentiment en tickets para mejora de CX."
+        ]
+      }
+    },
+    {
+      "id": "montools",
+      "name": "Monitoring Tools",
+      "funcionalidad": "Estable",
+      "funcDesc": "Plataformas de monitoreo activas con cobertura de alertas 24/7.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 4
+        },
+        {
+          "n": "Change",
+          "v": 29
+        },
+        {
+          "n": "Incidentes",
+          "v": 11
+        }
+      ],
+      "kpiNote": "Alertas gestionadas dentro de los umbrales definidos.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "140+",
+        "Uptime herramientas: 99.9%",
+        "Stack: Dynatrace · Grafana · Zabbix"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 4,
+          "total": 6,
+          "status": "ok",
+          "role": "Monitoring Eng",
+          "lead": "Mateus B."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 2,
+          "total": 4,
+          "status": "warn",
+          "role": "Observability",
+          "lead": "Andrea V."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 3,
+          "total": 5,
+          "status": "ok",
+          "role": "Monitoring Arch",
+          "lead": "Esteban M."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 1,
+          "total": 4,
+          "status": "crit",
+          "role": "Monitoring Eng",
+          "lead": "Rebeca T."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "Alerting Admin",
+          "lead": "Jorge A."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "Monitoring Lead",
+          "lead": "Patricia N."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Cobertura nocturna reducida — Chile",
+          "desc": "2 de 4 Monitoring Engineers disponibles. Turnos nocturnos cubiertos parcialmente.",
+          "impacto": "Medio",
+          "plan": "Rotación con apoyo de Colombia en horario nocturno\nAutomatización de alertas",
+          "resp": "Monitoring",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Mexico — recurso único",
+          "desc": "1 de 4 ingenieros disponibles. Riesgo en cobertura de alertas críticas durante horas pico.",
+          "impacto": "Alto",
+          "plan": "Soporte remoto Colombia\nContratación urgente Monitoring Eng Mexico",
+          "resp": "Monitoring",
+          "eta": "Q2"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Implementación de dashboards unificados en Grafana para todos los países.",
+          "Reducción del 30% en alertas falsas positivas mediante afinamiento de umbrales."
+        ],
+        "proyectos": [
+          "Migración de Zabbix a Dynatrace en Mexico y Chile: ETA Q3.",
+          "Implementación de AIOps para detección proactiva de anomalías."
+        ],
+        "otros": [
+          "Pendiente incorporación Monitoring Engineer Mexico. ETA: Mayo."
+        ]
+      }
+    },
+    {
+      "id": "monfit",
+      "name": "Monitoring FactorIT",
+      "funcionalidad": "Estable",
+      "funcDesc": "Plataforma propia FactorIT de monitoreo operando con cobertura regional.",
+      "kpis": [
+        {
+          "n": "RITM",
+          "v": 8
+        },
+        {
+          "n": "Change",
+          "v": 45
+        },
+        {
+          "n": "Incidentes",
+          "v": 17
+        }
+      ],
+      "kpiNote": "Operación estable con reducción de incidentes vs período anterior.",
+      "cobertura": [
+        "BR, COL, MEX, CHI, PER",
+        "80+",
+        "Uptime plataforma: 100%",
+        "Dashboards personalizados por cliente"
+      ],
+      "countries": [
+        {
+          "country": "Brasil",
+          "flag": "🇧🇷",
+          "available": 6,
+          "total": 8,
+          "status": "ok",
+          "role": "FactorIT Analyst",
+          "lead": "Felipe O."
+        },
+        {
+          "country": "Chile",
+          "flag": "🇨🇱",
+          "available": 3,
+          "total": 5,
+          "status": "ok",
+          "role": "FactorIT Eng",
+          "lead": "Lorena C."
+        },
+        {
+          "country": "Colombia",
+          "flag": "🇨🇴",
+          "available": 4,
+          "total": 7,
+          "status": "warn",
+          "role": "FactorIT Admin",
+          "lead": "Daniel S."
+        },
+        {
+          "country": "Mexico",
+          "flag": "🇲🇽",
+          "available": 2,
+          "total": 6,
+          "status": "warn",
+          "role": "FactorIT Analyst",
+          "lead": "Sandra V."
+        },
+        {
+          "country": "Peru",
+          "flag": "🇵🇪",
+          "available": 3,
+          "total": 4,
+          "status": "ok",
+          "role": "FactorIT Jr",
+          "lead": "Héctor M."
+        },
+        {
+          "country": "Latam",
+          "flag": "🌎",
+          "available": 2,
+          "total": 3,
+          "status": "ok",
+          "role": "FIT Lead",
+          "lead": "Olga R."
+        }
+      ],
+      "alertas": [
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Rotación — Colombia FactorIT",
+          "desc": "Salida de 1 perfil senior. Documentación de herramientas propietarias incompleta.",
+          "impacto": "Medio",
+          "plan": "Generación de runbooks y documentación técnica\nTransferencia de conocimiento antes de salida",
+          "resp": "FactorIT",
+          "eta": "Q2"
+        },
+        {
+          "tipo": "Alerta",
+          "icono": "⚠️",
+          "titulo": "Capacidad reducida Mexico",
+          "desc": "2 de 6 analistas disponibles por capacitación fuera del país. Retorno en 3 semanas.",
+          "impacto": "Bajo",
+          "plan": "Cobertura temporal con Colombia\nMonitoreo de retorno del equipo",
+          "resp": "FactorIT",
+          "eta": "Q2"
+        }
+      ],
+      "novedades": {
+        "logros": [
+          "Nuevos dashboards de SLA para 3 clientes clave en Brasil y Colombia.",
+          "Automatización de reportes semanales: ahorro de 8h/semana."
+        ],
+        "proyectos": [
+          "Expansión de plataforma FactorIT a Ecuador: ETA Q3.",
+          "Integración con ServiceNow para gestión automática de tickets desde alertas."
+        ],
+        "otros": [
+          "Documentación completa de herramientas propietarias — entrega antes de cierre de abril."
+        ]
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "sev": "crit",
+      "title": "Déficit crítico — Mexico DATACENTER & HCI",
+      "desc": "Solo 2 personas disponibles de 10. No es posible cubrir demanda de Q2 sin refuerzo inmediato.",
+      "tags": [
+        "Mexico",
+        "Datacenter",
+        "Q2 2025"
+      ],
+      "date": "2025-04-12"
+    },
+    {
+      "sev": "crit",
+      "title": "Capacidad mínima — Chile DATABASES",
+      "desc": "1 de 5 personas disponibles. Salida de 2 DBAs por licencia médica.",
+      "tags": [
+        "Chile",
+        "Databases",
+        "SLA"
+      ],
+      "date": "2025-04-11"
+    },
+    {
+      "sev": "crit",
+      "title": "Recursos insuficientes — Mexico CLOUD",
+      "desc": "2 de 9 disponibles. Proyectos de migración Azure bloqueados.",
+      "tags": [
+        "Mexico",
+        "Cloud",
+        "Migración"
+      ],
+      "date": "2025-04-10"
+    },
+    {
+      "sev": "crit",
+      "title": "Equipo reducido — Chile OpenShift On Premise",
+      "desc": "1 de 4 disponibles. OCP Admin único no puede garantizar estabilidad del clúster.",
+      "tags": [
+        "Chile",
+        "OpenShift",
+        "Producción"
+      ],
+      "date": "2025-04-09"
+    },
+    {
+      "sev": "crit",
+      "title": "Déficit operativo — Mexico TELECOM",
+      "desc": "1 de 7 ingenieros disponibles. Ventanas de mantenimiento en riesgo.",
+      "tags": [
+        "Mexico",
+        "Telecom",
+        "Mantenimiento"
+      ],
+      "date": "2025-04-08"
+    },
+    {
+      "sev": "crit",
+      "title": "Falta de cobertura — Mexico DEVSECOPS",
+      "desc": "1 de 6 disponible. Pipelines sin respaldo. Vulnerabilidades sin atención.",
+      "tags": [
+        "Mexico",
+        "DevSecOps",
+        "Seguridad"
+      ],
+      "date": "2025-04-07"
+    },
+    {
+      "sev": "warn",
+      "title": "Cobertura nocturna — Chile Monitoring Tools",
+      "desc": "2 de 4 disponibles. Turnos nocturnos cubiertos parcialmente.",
+      "tags": [
+        "Chile",
+        "Monitoring",
+        "Turnos"
+      ],
+      "date": "2025-04-06"
+    },
+    {
+      "sev": "warn",
+      "title": "Reducción temporal — Mexico Monitoring FactorIT",
+      "desc": "2 de 6 disponibles por capacitación fuera del país.",
+      "tags": [
+        "Mexico",
+        "FactorIT",
+        "Temporal"
+      ],
+      "date": "2025-04-05"
+    },
+    {
+      "sev": "warn",
+      "title": "Rotación — Colombia Monitoring FactorIT",
+      "desc": "Salida de perfil senior. Documentación incompleta.",
+      "tags": [
+        "Colombia",
+        "FactorIT",
+        "Rotación"
+      ],
+      "date": "2025-04-04"
+    },
+    {
+      "sev": "info",
+      "title": "Plan cobertura cruzada — Chile DATACENTER",
+      "desc": "Soporte coordinado con Colombia para backup y storage durante abril.",
+      "tags": [
+        "Chile",
+        "Datacenter",
+        "Soporte Cruzado"
+      ],
+      "date": "2025-04-03"
+    }
+  ],
+  "commitments": [
+    {
+      "title": "Contratación 4 perfiles Mexico — DATACENTER & HCI",
+      "desc": "Apertura de proceso con HR. Meta incorporación: 30 Mayo.",
+      "status": "prog",
+      "label": "En progreso",
+      "due": "30 May 2025",
+      "owner": "RRHH / Datacenter Lead"
+    },
+    {
+      "title": "Reasignación temporal Colombia → Chile — DATABASES",
+      "desc": "2 DBAs de Colombia apoyan a Chile por 45 días por licencia médica.",
+      "status": "done",
+      "label": "Completado",
+      "due": "01 Abr 2025",
+      "owner": "Databases Lead"
+    },
+    {
+      "title": "Plan cobertura nocturna — Chile Monitoring Tools",
+      "desc": "Rotación con apoyo Colombia para garantizar monitoreo 24/7.",
+      "status": "pend",
+      "label": "Pendiente",
+      "due": "20 Abr 2025",
+      "owner": "Monitoring Lead"
+    },
+    {
+      "title": "Contratación OCP Admin — Chile OpenShift",
+      "desc": "Posición abierta. Entrevistas en curso. Incorporación: Mayo.",
+      "status": "prog",
+      "label": "En progreso",
+      "due": "15 May 2025",
+      "owner": "RRHH / OpenShift Lead"
+    },
+    {
+      "title": "Refuerzo Azure Engineers — Mexico CLOUD",
+      "desc": "3 Azure Engineers en contrato temporal 6 meses para migración.",
+      "status": "prog",
+      "label": "En progreso",
+      "due": "30 Abr 2025",
+      "owner": "Cloud Lead / RRHH"
+    },
+    {
+      "title": "Documentación FactorIT — Colombia",
+      "desc": "Runbooks y documentación técnica antes del cierre de abril.",
+      "status": "pend",
+      "label": "Pendiente",
+      "due": "30 Abr 2025",
+      "owner": "FactorIT Lead"
+    },
+    {
+      "title": "Cobertura pipelines seguridad — Mexico DevSecOps",
+      "desc": "Soporte remoto Colombia para CVEs hasta completar equipo local.",
+      "status": "done",
+      "label": "Completado",
+      "due": "05 Abr 2025",
+      "owner": "DevSecOps Lead"
+    },
+    {
+      "title": "Retorno equipo FactorIT — Mexico post-capacitación",
+      "desc": "Seguimiento retorno del equipo. Validar reincorporación operativa.",
+      "status": "pend",
+      "label": "Pendiente",
+      "due": "25 Abr 2025",
+      "owner": "FactorIT / PMO"
+    }
+  ]
+};
+
+let currentAreaIdx = 0;
+
+function renderAll(d){
+  const dt = new Date(d.lastUpdate);
+  document.getElementById('lupd').textContent =
+    'Generado: ' + dt.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}) +
+    ' · ' + dt.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('ba').textContent = d.alerts.length;
+  document.getElementById('bc').textContent = d.commitments.length;
+
+  const fb = document.getElementById('fbar');
+  fb.innerHTML = '<span class="fl">\u00c1rea:</span>';
+  d.areas.forEach((a,i) => {
+    const b = document.createElement('button');
+    b.className = 'fbtn' + (i===0?' active':'');
+    b.textContent = a.name;
+    b.onclick = () => {
+      currentAreaIdx = i;
+      document.querySelectorAll('.fbtn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      renderAreaDetail(d, i);
+    };
+    fb.appendChild(b);
+  });
+
+  renderAreaDetail(d, 0);
+  renderAlerts(d);
+  renderCommits(d);
+}
+
+function renderAreaDetail(d,idx){
+  const area=d.areas[idx];
+  const prev=d.areas[idx>0?idx-1:d.areas.length-1];
+  const next=d.areas[idx<d.areas.length-1?idx+1:0];
+  const alto=area.alertas.filter(a=>a.impacto==='Alto').length;
+  const medio=area.alertas.filter(a=>a.impacto==='Medio').length;
+  const bajo=area.alertas.filter(a=>a.impacto==='Bajo').length;
+  document.getElementById('area-detail').innerHTML=`
+    <div class="area-nav">
+      <button class="nav-arrow" onclick="navArea(${idx>0?idx-1:d.areas.length-1})">&lt; ${prev.name}</button>
+      <span class="area-nav-title">ESTADO GENERAL — ${area.name}</span>
+      <button class="nav-arrow" onclick="navArea(${idx<d.areas.length-1?idx+1:0})">${next.name} &gt;</button>
+    </div>
+    <div class="area-body">
+      <div class="left-panel">
+        <div class="lp-card">
+          <div class="func-status">
+            <span class="func-label">Funcionalidad: <strong>${area.funcionalidad}</strong></span>
+            <span class="func-check">✓</span>
+          </div>
+          <p class="func-desc">${area.funcDesc}</p>
+        </div>
+        <div class="lp-card">
+          <div class="lp-section-title">KPIs Clave</div>
+          <p style="font-size:10px;color:var(--muted);margin-bottom:8px;">Durante el primer corte del 2026 se tienen las siguientes cifras en cuanto a solicitudes:</p>
+          ${area.kpis.map(k=>`<div class="kpi-row"><span class="kpi-name">${k.n}</span><span class="kpi-val">${k.v}</span></div>`).join('')}
+          <div class="kpi-total-row"><span class="kpi-total-name">Total</span><span class="kpi-total-val">${area.kpis.reduce((s,k)=>s+k.v,0)}</span></div>
+          <p class="kpi-note">✅ ${area.kpiNote}</p>
+        </div>
+        <div class="lp-card">
+          <div class="lp-section-title">Cobertura</div>
+          ${area.cobertura.map(c=>`<div class="cov-item"><span class="cov-icon">✓</span><span class="cov-text">${c}</span></div>`).join('')}
+        </div>
+        <div class="lp-card">
+          <div class="lp-section-title">Capacity por País</div>
+          ${area.countries.map(c=>{
+            const pct=Math.round(c.available/c.total*100);
+            const bc=c.status==='ok'?'#00915A':c.status==='warn'?'#A3C439':'#EF7B5B';
+            const nc=c.status==='ok'?'var(--primary)':c.status==='warn'?'#A3C439':'#EF7B5B';
+            return `<div style="margin-bottom:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                <span style="font-size:11px;font-weight:500;">${c.flag} ${c.country}</span>
+                <span style="font-size:11px;color:${nc};font-weight:700;">${c.available}<span style="color:var(--muted);font-weight:400;">/${c.total}</span></span>
+              </div>
+              <div style="background:var(--surface2);border-radius:3px;height:4px;overflow:hidden;">
+                <div style="width:${pct}%;height:100%;background:${bc};border-radius:3px;"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="center-panel">
+        <div class="panel-header">
+          <span class="panel-header-title">Alertas y Riesgos</span>
+          <div class="impact-pills">
+            <span class="ipill ipill-alto">${alto} Alto</span>
+            <span class="ipill ipill-medio">${medio} Medio</span>
+            <span class="ipill ipill-bajo">${bajo} Bajo</span>
+          </div>
+        </div>
+        <div class="alerts-table">
+          <div class="at-header">
+            <div>Tipo</div><div>Descripción</div><div>Impacto</div><div>Plan de Acción</div><div>Resp. / ETA</div>
+          </div>
+          ${area.alertas.length?area.alertas.map(al=>{
+            const ic=al.impacto==='Alto'?'ib-alto':al.impacto==='Medio'?'ib-medio':'ib-bajo';
+            const planLines=al.plan.split('\n').map(l=>`• ${l}`).join('<br>');
+            return `<div class="alert-row">
+              <div class="ar-icon">⚠️</div>
+              <div class="ar-desc"><div class="ar-desc-title">${al.titulo}</div><div class="ar-desc-text">${al.desc.replace(/\n/g,'<br>')}</div><div style="font-size:9px;color:var(--subtle);margin-top:4px;">${al.tipo}</div></div>
+              <div class="ar-impact"><span class="impact-badge ${ic}">${al.impacto}</span></div>
+              <div class="ar-plan">${planLines}</div>
+              <div class="ar-resp"><span class="resp-text">${al.resp}</span><span class="quarter-badge">${al.eta}</span></div>
+            </div>`;
+          }).join(''):`<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;">✅ Sin alertas activas para esta área</div>`}
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="rp-card">
+          <div class="rp-header"><div class="rp-header-title">Novedades Relevantes</div></div>
+          <div class="rp-body">
+            <div class="rp-section"><span class="rp-tag tag-green">Logros</span><div class="rp-text"><ul>${area.novedades.logros.map(l=>`<li>${l}</li>`).join('')}</ul></div></div>
+            <div class="rp-section"><span class="rp-tag tag-gray">Proyectos / Iniciativas</span><div class="rp-text"><ul>${area.novedades.proyectos.map(p=>`<li>${p}</li>`).join('')}</ul></div></div>
+            <div class="rp-section"><span class="rp-tag tag-gray">Otros</span><div class="rp-text">${area.novedades.otros.map(o=>o.replace(/\n/g,'<br>')).join('<br><br>')}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;padding:10px;font-size:10px;color:var(--subtle);letter-spacing:2px;border-top:1px solid var(--border);">· Comité I &nbsp; IT Capacity ·</div>`;
+}
+
+function navArea(idx){
+  currentAreaIdx=idx;
+  document.querySelectorAll('.fbtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  renderAreaDetail(DATA,idx);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderAlerts(d){
+  document.getElementById('alist').innerHTML=d.alerts.map(a=>{
+    const cls=a.sev==='warn'?' warn':a.sev==='info'?' info':'';
+    const sc=a.sev==='crit'?'sc':a.sev==='warn'?'sw':'si2';
+    const sl=a.sev==='crit'?'Crítico':a.sev==='warn'?'Advertencia':'Información';
+    return `<div class="aitem${cls}"><span class="asev ${sc}">${sl}</span><div class="abody"><div class="atitle">${a.title}</div><div class="adesc">${a.desc}</div><div class="atags">${a.tags.map(t=>`<span class="atag">${t}</span>`).join('')}</div><div class="adate">📅 ${a.date}</div></div></div>`;
+  }).join('');
+}
+
+function renderCommits(d){
+  document.getElementById('clist').innerHTML=d.commitments.map((c,i)=>{
+    const bc=c.status==='prog'?'cp':c.status==='done'?'cd':c.status==='late'?'cl':'ce';
+    return `<div class="citem"><div class="cnum">${String(i+1).padStart(2,'0')}</div><div class="cbody"><div class="ctitle2">${c.title}</div><div class="cdesc">${c.desc}</div><div class="cfoot"><span class="csbadge ${bc}">${c.label}</span><span class="cmeta2">👤 ${c.owner}</span><span class="cmeta2">📅 ${c.due}</span></div></div></div>`;
+  }).join('');
+}
+
+function sw(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelector('[data-tab="'+id+'"]').classList.add('active');
+}
+
+
+
+// ── Tema: inyección de <style> con !important ─────────
+(function() {
+  var el = document.getElementById('cap-dashboard');
+  if (!el) return;
+
+  var DARK = {
+    bg:'#111111', surface:'#1A1A1A', surface2:'#222222', surface3:'#2A2A2A',
+    border:'#333333', border2:'#444444', text:'#F0F0F0', muted:'#888888', subtle:'#555555',
+    primary:'#00915A', pdark:'#006B43', pglow:'rgba(0,145,90,0.14)',
+    coral:'#EF7B5B', amber:'#E8A020', sky:'#56B4C0',
+    stokBg:'rgba(0,145,90,0.18)', stokT:'#00915A',
+    swarnBg:'rgba(163,196,57,0.18)', swarnT:'#8aaa2e',
+    scritBg:'rgba(239,123,91,0.2)', scritT:'#EF7B5B'
+  };
+  var LIGHT = {
+    bg:'#F4F5F7', surface:'#FFFFFF', surface2:'#F0F1F3', surface3:'#E8E9EB',
+    border:'#DFE1E6', border2:'#C1C7D0', text:'#172B4D', muted:'#5E6C84', subtle:'#97A0AF',
+    primary:'#00915A', pdark:'#006B43', pglow:'rgba(0,145,90,0.10)',
+    coral:'#C9402A', amber:'#B37400', sky:'#0052CC',
+    stokBg:'rgba(0,145,90,0.12)', stokT:'#006B43',
+    swarnBg:'rgba(130,100,0,0.12)', swarnT:'#7A5000',
+    scritBg:'rgba(191,38,0,0.10)', scritT:'#BF2600'
+  };
+
+  function buildCSS(t, sel) {
+    return sel+'{background:'+t.bg+' !important;color:'+t.text+' !important;}'+
+    sel+' header,'+sel+' .tabs{background:'+t.surface+' !important;border-color:'+t.border+' !important;}'+
+    sel+' main{background:'+t.bg+' !important;}'+
+    sel+' .lp-card,'+sel+' .rp-card,'+sel+' .citem,'+sel+' .aitem,'+sel+' .area-nav,'+sel+' .alerts-table,'+sel+' .area-body{background:'+t.surface+' !important;border-color:'+t.border+' !important;}'+
+    sel+' .at-header,'+sel+' .rp-header,'+sel+' .alert-row:hover{background:'+t.surface2+' !important;}'+
+    sel+' .h-badge,'+sel+' .theme-toggle,'+sel+' .fbtn:not(.active){background:'+t.surface2+' !important;border-color:'+t.border+' !important;}'+
+    sel+' .atag{background:'+t.surface2+' !important;border-color:'+t.border+' !important;}'+
+    sel+' .h-title,'+sel+' .func-label,'+sel+' .kpi-val,'+sel+' .kpi-total-name,'+sel+' .ar-desc-title,'+sel+' .atitle,'+sel+' .ctitle2,'+sel+' .rp-header-title{color:'+t.text+' !important;}'+
+    sel+' .h-sub,'+sel+' .func-desc,'+sel+' .kpi-name,'+sel+' .ar-desc-text,'+sel+' .ar-plan,'+sel+' .adesc,'+sel+' .cdesc,'+sel+' .resp-text,'+sel+' .rp-text,'+sel+' .cov-text,'+sel+' .cmeta2,'+sel+' .adate,'+sel+' .fl,'+sel+' .tbtn:not(.active),'+sel+' .h-badge,'+sel+' .theme-toggle,'+sel+' .nav-arrow,'+sel+' .fbtn:not(.active){color:'+t.muted+' !important;}'+
+    sel+' .kpi-note,'+sel+' .ar-desc .ar-desc-text+div{color:'+t.subtle+' !important;}'+
+    sel+' .tbtn.active{color:'+t.primary+' !important;background:'+t.pglow+' !important;}'+
+    sel+' .fbtn.active{background:'+t.primary+' !important;color:#fff !important;}'+
+    sel+' .lp-section-title,'+sel+' .area-nav-title,'+sel+' .kpi-total-val,'+sel+' .cnum{color:'+t.primary+' !important;}'+
+    sel+' .lp-section-title,'+sel+' .kpi-row{border-color:'+t.border+' !important;}'+
+    sel+' .quarter-badge{background:'+t.pdark+' !important;}'+
+    sel+' .st-ok{background:'+t.stokBg+' !important;color:'+t.stokT+' !important;}'+
+    sel+' .st-warn{background:'+t.swarnBg+' !important;color:'+t.swarnT+' !important;}'+
+    sel+' .st-crit{background:'+t.scritBg+' !important;color:'+t.scritT+' !important;}'+
+    sel+' .sc{background:'+t.scritBg+' !important;color:'+t.scritT+' !important;}'+
+    sel+' .sw{background:'+t.swarnBg+' !important;color:'+t.swarnT+' !important;}'+
+    sel+' .ib-alto{color:'+t.coral+' !important;border-color:'+t.coral+' !important;}'+
+    sel+' .ib-medio{color:'+t.amber+' !important;border-color:'+t.amber+' !important;}'+
+    sel+' .aitem{border-left-color:'+t.coral+' !important;}'+
+    sel+' .aitem.warn{border-left-color:'+t.amber+' !important;}'+
+    sel+' .at-header div,'+sel+' .muted-text{color:'+t.muted+' !important;}';
+  }
+
+  var styleTag = document.createElement('style');
+  styleTag.id = 'cap-theme-style';
+  (document.head || document.querySelector('head') || document.documentElement).appendChild(styleTag);
+
+  function detectDark() {
+    try {
+      var pb = window.parent.document.body;
+      var pc = (pb.className||'')+' '+(pb.getAttribute('data-color-mode')||'');
+      var hc = (pb.parentElement ? pb.parentElement.className : '')||'';
+      if(pc.includes('dark')||hc.includes('dark')) return true;
+      if(pc.includes('light')||hc.includes('light')) return false;
+    } catch(e) {}
+    try {
+      var b = document.body;
+      var bc = (b.className||'')+' '+(b.getAttribute('data-color-mode')||'');
+      var hc2 = document.documentElement.className||'';
+      if(bc.includes('dark')||hc2.includes('dark')) return true;
+      if(bc.includes('light')||hc2.includes('light')) return false;
+    } catch(e) {}
+    try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e) {}
+    return true;
+  }
+
+  var _isDark = detectDark();
+
+  function applyTheme(dark) {
+    _isDark = dark;
+    styleTag.textContent = buildCSS(dark ? DARK : LIGHT, '#cap-dashboard');
+    var btn = document.getElementById('theme-toggle-btn');
+    if(btn) btn.textContent = dark ? '☀️' : '🌙';
+    el.setAttribute('data-theme', dark ? 'dark' : 'light');
+  }
+
+  window.toggleTheme = function() { applyTheme(!_isDark); };
+
+  applyTheme(_isDark);
+
+  // Observar cambios en tiempo real
+  function observe(target) {
+    try {
+      new MutationObserver(function() { applyTheme(detectDark()); })
+        .observe(target, {attributes:true, attributeFilter:['class','data-color-mode']});
+    } catch(e) {}
+  }
+  try { observe(window.parent.document.body); } catch(e) {}
+  try { observe(document.body); } catch(e) {}
+  try {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+      applyTheme(detectDark());
+    });
+  } catch(e) {}
+})();
+
+renderAll(DATA);
+</script>
