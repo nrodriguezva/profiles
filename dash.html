@@ -1804,93 +1804,30 @@ function sw(id){
   styleTag.id = 'cap-theme-style';
   (document.head || document.querySelector('head') || document.documentElement).appendChild(styleTag);
 
-  function detectDark() {
-    // Confluence inyecta <style data-theme="dark|light|original">
-    // El que tiene contenido CSS es el tema activo
-    function checkStyleTags(doc) {
-      try {
-        var styles = doc.querySelectorAll('style[data-theme]');
-        var byTheme = {};
-        styles.forEach(function(s) {
-          byTheme[s.getAttribute('data-theme')] = s.textContent.trim().length;
-        });
-        // El activo es el que tiene contenido
-        if ((byTheme['dark']||0) > 0)    return true;
-        if ((byTheme['light']||0) > 0)   return false;
-        if ((byTheme['original']||0) > 0) return false;
-      } catch(e) {}
-      return null;
-    }
-
-    var docs = [];
-    try { docs.push(window.parent.document); } catch(e) {}
-    try { docs.push(document); } catch(e) {}
-    for (var d = 0; d < docs.length; d++) {
-      var r = checkStyleTags(docs[d]);
-      if (r !== null) return r;
-    }
-    try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e) {}
-    return true;
+  // Tema: oscuro por defecto, toggle guarda en localStorage
+  var STORAGE_KEY = 'cap-dashboard-theme';
+  var _isDark;
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    _isDark = (saved === null) ? true : (saved === 'dark');
+  } catch(e) {
+    _isDark = true;
   }
-
-  function observeAll() {
-    var docs = [];
-    try { docs.push(window.parent.document); } catch(e) {}
-    try { docs.push(document); } catch(e) {}
-    docs.forEach(function(doc) {
-      try {
-        new MutationObserver(function() {
-          applyTheme(detectDark());
-        }).observe(doc.head || doc.documentElement, {
-          childList: true, subtree: true,
-          characterData: true, attributes: true,
-          attributeFilter: ['data-theme']
-        });
-      } catch(e) {}
-    });
-  }
-
-
-  var _isDark = detectDark();
 
   function applyTheme(dark) {
     _isDark = dark;
     styleTag.textContent = buildCSS(dark ? DARK : LIGHT, '#cap-dashboard');
     var btn = document.getElementById('theme-toggle-btn');
-    if(btn) btn.textContent = dark ? '☀️' : '🌙';
+    if (btn) btn.textContent = dark ? '☀️' : '🌙';
     el.setAttribute('data-theme', dark ? 'dark' : 'light');
+    try { localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light'); } catch(e) {}
   }
 
   window.toggleTheme = function() { applyTheme(!_isDark); };
 
   applyTheme(_isDark);
-
-  // Observar cambios en tiempo real (html + body, padre + local)
-  observeAll();
-  try {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
-      applyTheme(detectDark());
-    });
-  } catch(e) {}
-
-  // Log para debug
-  try {
-    var dbg = [];
-    var _docs = [];
-    try { _docs.push({label:'parent', doc: window.parent.document}); } catch(e) {}
-    try { _docs.push({label:'local',  doc: document}); } catch(e) {}
-    _docs.forEach(function(d) {
-      try {
-        var styles = d.doc.querySelectorAll('style[data-theme]');
-        styles.forEach(function(s) {
-          dbg.push('[CAP-THEME] '+d.label+' <style data-theme="'+s.getAttribute('data-theme')+'"> contentLen='+s.textContent.trim().length);
-        });
-      } catch(e) { dbg.push('[CAP-THEME] '+d.label+' error: '+e); }
-    });
-    dbg.push('[CAP-THEME] detectDark() = '+detectDark());
-    console.log(dbg.join('\n'));
-  } catch(e) {}
 })();
+
 
 renderAll(DATA);
 </script>
