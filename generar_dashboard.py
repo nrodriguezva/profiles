@@ -87,17 +87,9 @@ def safe_int(val):
 # ════════════════════════════════════════════════════════
 #  lastUpdate
 # ════════════════════════════════════════════════════════
-cfg_row = df_cfg[df_cfg.iloc[:, 0].astype(str).str.strip() == "lastUpdate"]
-last_update = cfg_row.iloc[0, 1].strip() if not cfg_row.empty else datetime.now().isoformat(timespec='seconds')
+last_update = datetime.now().isoformat(timespec='seconds')
 
-logo_row = df_cfg[df_cfg.iloc[:, 0].astype(str).str.strip() == "logo_base64"]
-logo_b64 = ""
-if not logo_row.empty:
-    raw = logo_row.iloc[0, 1]
-    if raw is not None and str(raw).strip() not in ("", "nan"):
-        logo_b64 = str(raw).strip()
-        if not logo_b64.startswith("data:"):
-            logo_b64 = "data:image/png;base64," + logo_b64
+
 
 # ════════════════════════════════════════════════════════
 #  CONSTRUIR DATOS
@@ -254,9 +246,6 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .h-accent{width:5px;flex-shrink:0;background:linear-gradient(180deg,#595959 0%,var(--primary) 100%);}
 #cap-dashboard .h-content{flex:1;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;flex-wrap:wrap;gap:10px;}
 #cap-dashboard .h-left{display:flex;align-items:center;gap:14px;}
-#cap-dashboard .logo-slot{width:48px;height:48px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
-#cap-dashboard .logo-slot img{width:100%;height:100%;object-fit:contain;}
-#cap-dashboard .logo-placeholder{font-size:8px;color:var(--subtle);text-align:center;line-height:1.3;pointer-events:none;}
 #cap-dashboard .h-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1;color:var(--text);}
 #cap-dashboard .h-sub{font-size:12px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
 #cap-dashboard .h-badge{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;}
@@ -464,9 +453,6 @@ HTML_TEMPLATE = r"""<style>
   <div class="h-accent"></div>
   <div class="h-content">
     <div class="h-left">
-      <div class="logo-slot" id="logo-slot">
-        __LOGO_CONTENT__
-      </div>
       <div>
         <div class="h-title">Gestión de Capacity e Iniciativas de Delivery</div>
         <div class="h-sub">Capacity por país y área · Comités &amp; Compromisos</div>
@@ -568,7 +554,7 @@ function toggleCommit(idx) {
 function renderAll(d){
   const dt = new Date(d.lastUpdate);
   document.getElementById('lupd').textContent =
-    'Generado: ' + dt.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}) +
+    'Actualizado: ' + dt.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'}) +
     ' · ' + dt.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
 
   document.getElementById('ba').textContent = d.alerts.length;
@@ -1041,14 +1027,7 @@ renderAll(DATA);
 #  GENERAR HTML
 # ════════════════════════════════════════════════════════
 data_json = json.dumps(DATA, ensure_ascii=False, indent=2)
-# Build logo content
-if logo_b64:
-    logo_content = f'<img src="{logo_b64}" alt="Logo empresa" style="width:100%;height:100%;object-fit:contain;">'
-else:
-    logo_content = '<div class="logo-placeholder">LOGO<br>empresa</div>'
-
 html_final = HTML_TEMPLATE.replace("__DATA_PLACEHOLDER__", data_json)
-html_final = html_final.replace("__LOGO_CONTENT__", logo_content)
 
 # Documento HTML completo — funciona en navegador directo Y en Confluence
 standalone = (
