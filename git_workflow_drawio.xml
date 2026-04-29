@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Claude" version="21.0.0">
+  <diagram name="Git Workflow" id="git-workflow">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TÍTULO -->
+        <mxCell id="title" value="Git Workflow — toda rama nace desde main" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="327" y="30" width="600" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ══ LEYENDA ══ -->
+        <mxCell id="leyenda-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;dashed=1;dashPattern=4 4;" vertex="1" parent="1">
+          <mxGeometry x="327" y="80" width="600" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ley1" value="Rama base" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5DCAA5;strokeColor=#0F6E56;fontColor=#085041;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="90" width="100" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="ley2" value="Rama temporal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="455" y="90" width="110" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="ley3" value="Release (comité)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0997B;strokeColor=#993C1D;fontColor=#4A1B0C;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="580" y="90" width="120" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="ley4" value="Main (producción)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85B7EB;strokeColor=#185FA5;fontColor=#042C53;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="715" y="90" width="120" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="ley5" value="Merge / flujo" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="850" y="90" width="70" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ══ MAIN (ORIGEN) ══ -->
+        <mxCell id="main-origen" value="&lt;b&gt;main&lt;/b&gt;&lt;br&gt;Origen de todas las ramas — producción estable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85B7EB;strokeColor=#185FA5;fontColor=#042C53;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="327" y="150" width="600" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Etiqueta: se crea desde main -->
+        <mxCell id="label-desde-main" value="Se crea desde main" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#185FA5;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="527" y="218" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ══ RAMAS TEMPORALES ══ -->
+        <!-- feature/x -->
+        <mxCell id="feat-x" value="&lt;b&gt;feature/x&lt;/b&gt;&lt;br&gt;nueva función" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="327" y="248" width="130" height="50" as="geometry" />
+        </mxCell>
+        <!-- bugfix/y -->
+        <mxCell id="bugfix-y" value="&lt;b&gt;bugfix/y&lt;/b&gt;&lt;br&gt;corrección" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="477" y="248" width="130" height="50" as="geometry" />
+        </mxCell>
+        <!-- hotfix/w -->
+        <mxCell id="hotfix-w" value="&lt;b&gt;hotfix/w&lt;/b&gt;&lt;br&gt;fix urgente" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="627" y="248" width="130" height="50" as="geometry" />
+        </mxCell>
+        <!-- feature/z -->
+        <mxCell id="feat-z" value="&lt;b&gt;feature/z&lt;/b&gt;&lt;br&gt;nueva función" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="777" y="248" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- flechas main → ramas temporales -->
+        <mxCell id="e-main-feat-x" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#185FA5;" edge="1" source="main-origen" target="feat-x" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-main-bugfix" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#185FA5;" edge="1" source="main-origen" target="bugfix-y" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-main-hotfix" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#185FA5;" edge="1" source="main-origen" target="hotfix-w" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-main-feat-z" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#185FA5;" edge="1" source="main-origen" target="feat-z" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Separador entornos -->
+        <mxCell id="sep1" value="— Cada rama mergea a su entorno correspondiente (dev y qa son independientes entre sí) —" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="227" y="318" width="800" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ══ RAMA DEV ══ -->
+        <mxCell id="dev" value="&lt;b&gt;dev&lt;/b&gt;&lt;br&gt;Integración continua" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5DCAA5;strokeColor=#0F6E56;fontColor=#04342C;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="327" y="348" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dev-nota" value="No escala a otros entornos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#CCCCCC;dashed=1;dashPattern=3 3;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="327" y="418" width="280" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ══ RAMA QA ══ -->
+        <mxCell id="qa" value="&lt;b&gt;qa&lt;/b&gt;&lt;br&gt;Pruebas y validación de calidad" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5DCAA5;strokeColor=#0F6E56;fontColor=#04342C;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="647" y="348" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qa-nota" value="No escala a otros entornos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#CCCCCC;dashed=1;dashPattern=3 3;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="647" y="418" width="280" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- flechas ramas → dev -->
+        <mxCell id="e-featx-dev" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#534AB7;" edge="1" source="feat-x" target="dev" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-bugfix-dev" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#534AB7;" edge="1" source="bugfix-y" target="dev" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- flechas ramas → qa -->
+        <mxCell id="e-hotfix-qa" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#534AB7;" edge="1" source="hotfix-w" target="qa" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-featz-qa" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#534AB7;" edge="1" source="feat-z" target="qa" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Separador release -->
+        <mxCell id="sep2" value="— Ramas listas para producción van directo a release —" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="227" y="458" width="800" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Ramas → release -->
+        <mxCell id="feat-rel" value="&lt;b&gt;feature/release&lt;/b&gt;&lt;br&gt;lista para producción" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="397" y="488" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="hotfix-rel" value="&lt;b&gt;hotfix/release&lt;/b&gt;&lt;br&gt;fix urgente a prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="697" y="488" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- flechas ramas → release -->
+        <mxCell id="e-featrel-rel" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#534AB7;" edge="1" source="feat-rel" target="release" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-hotrel-rel" style="edgeStyle=orthogonalEdgeStyle;dashed=1;endArrow=block;endFill=1;strokeColor=#534AB7;" edge="1" source="hotfix-rel" target="release" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ══ RAMA RELEASE ══ -->
+        <mxCell id="release" value="&lt;b&gt;release&lt;/b&gt;&lt;br&gt;Presentación al comité — solo lectura hasta decisión" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0997B;strokeColor=#993C1D;fontColor=#4A1B0C;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="327" y="558" width="600" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ══ DECISIÓN COMITÉ ══ -->
+        <mxCell id="comite-label" value="Comité de cambios" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="527" y="638" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="comite-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;dashed=1;dashPattern=5 4;" vertex="1" parent="1">
+          <mxGeometry x="427" y="628" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="decision" value="¿Aprobado?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="527" y="648" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- flecha release → decisión -->
+        <mxCell id="e-release-dec" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;strokeColor=#993C1D;" edge="1" source="release" target="decision" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- NO → rechazado -->
+        <mxCell id="rechazado" value="&lt;b&gt;Rechazado&lt;/b&gt;&lt;br&gt;vuelve al ciclo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCCCC;strokeColor=#E24B4A;fontColor=#A32D2D;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="847" y="658" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e-no" value="No" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;strokeColor=#E24B4A;fontColor=#A32D2D;fontStyle=1;fontSize=11;" edge="1" source="decision" target="rechazado" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SÍ → merge -->
+        <mxCell id="merge-block" value="&lt;b&gt;Desarrollador hace merge&lt;/b&gt;&lt;br&gt;release → main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="477" y="768" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e-si" value="Sí" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;strokeColor=#1D9E75;fontColor=#1D9E75;fontStyle=1;fontSize=11;" edge="1" source="decision" target="merge-block" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ══ MAIN (DESTINO) ══ -->
+        <mxCell id="main-destino" value="&lt;b&gt;main&lt;/b&gt;&lt;br&gt;Producción — código aprobado y estable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85B7EB;strokeColor=#185FA5;fontColor=#042C53;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="327" y="848" width="600" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e-merge-main" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;strokeColor=#185FA5;" edge="1" source="merge-block" target="main-destino" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ══ ELIMINACIÓN ══ -->
+        <mxCell id="sep3" value="— Tras mergear a su entorno, la rama temporal se elimina —" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="227" y="928" width="800" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="rama-borrar" value="feature / bugfix / hotfix / refactor / chore / docs..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AFA9EC;strokeColor=#534AB7;fontColor=#26215C;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="327" y="958" width="280" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="borrada" value="🗑 Rama borrada (vida corta)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCCCC;strokeColor=#E24B4A;fontColor=#A32D2D;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="647" y="958" width="230" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="e-borrar" style="endArrow=block;endFill=1;strokeColor=#E24B4A;" edge="1" source="rama-borrar" target="borrada" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ══ TIPOS DE RAMAS (tabla referencia) ══ -->
+        <mxCell id="tipos-titulo" value="Tipos de ramas permitidas" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo1" value="&lt;b&gt;feature/&lt;/b&gt; — nueva funcionalidad" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="188" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo2" value="&lt;b&gt;bugfix/&lt;/b&gt; — corrección no urgente" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="222" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo3" value="&lt;b&gt;hotfix/&lt;/b&gt; — fix urgente a producción" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="256" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo4" value="&lt;b&gt;refactor/&lt;/b&gt; — mejora de código" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="290" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo5" value="&lt;b&gt;chore/&lt;/b&gt; — tareas técnicas / deps" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="324" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo6" value="&lt;b&gt;docs/&lt;/b&gt; — documentación" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="358" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo7" value="&lt;b&gt;test/&lt;/b&gt; — pruebas" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="392" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo8" value="&lt;b&gt;ci/&lt;/b&gt; — pipelines CI/CD" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="426" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo9" value="&lt;b&gt;infra/&lt;/b&gt; — infraestructura" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="460" width="240" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tipo10" value="&lt;b&gt;spike/&lt;/b&gt; — investigación / PoC" style="text;html=1;strokeColor=none;fillColor=#AFA9EC;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;rounded=1;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="60" y="494" width="240" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- Convención nombre -->
+        <mxCell id="convencion-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#CCCCCC;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="convencion-titulo" value="Convención de nombre" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="68" y="546" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="convencion-val" value="tipo/ID-descripcion-corta&lt;br&gt;&lt;i&gt;ej: feature/PROJ-142-auth-google&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="68" y="564" width="224" height="32" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
