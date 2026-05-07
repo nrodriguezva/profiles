@@ -146,14 +146,16 @@ for _, ar in df_areas.iterrows():
         })
 
     # Novedades
-    logros, proyectos, otros = [], [], []
+    logros, proyectos, pendientes, incidentes, otros = [], [], [], [], []
     for _, nr in df_nov[df_nov.iloc[:, 0].astype(str).str.strip() == aid].iterrows():
         tipo  = safe(nr.iloc[1]) or ""
         texto = safe(nr.iloc[2]) or ""
         if not texto: continue
-        if   tipo == "logro":    logros.append(texto)
-        elif tipo == "proyecto": proyectos.append(texto)
-        else:                    otros.append(texto)
+        if   tipo == "logro":      logros.append(texto)
+        elif tipo == "proyecto":   proyectos.append(texto)
+        elif tipo == "pendiente":  pendientes.append(texto)
+        elif tipo == "incidente":  incidentes.append(texto)
+        else:                      otros.append(texto)
 
     areas.append({
         "id":            aid,
@@ -165,7 +167,7 @@ for _, ar in df_areas.iterrows():
         "cobertura":     cobertura,
         "countries":     countries,
         "alertas":       alertas,
-        "novedades":     {"logros": logros, "proyectos": proyectos, "otros": otros},
+        "novedades":     {"logros": logros, "proyectos": proyectos, "pendientes": pendientes, "incidentes": incidentes, "otros": otros},
     })
 
 # Alertas Comité
@@ -323,7 +325,7 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .rp-body{padding:12px 14px;}
 #cap-dashboard .rp-tag{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:5px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
 #cap-dashboard .tag-green{background:var(--primary);color:#fff;}
-#cap-dashboard .tag-gray{background:var(--surface3);color:var(--muted);border:1px solid var(--border2);}
+#cap-dashboard .tag-gray{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
 #cap-dashboard .rp-text{font-size:13px;color:var(--muted);line-height:1.6;}
 #cap-dashboard .rp-text li{margin-left:12px;margin-top:3px;}
 #cap-dashboard .rp-section{margin-bottom:10px;}
@@ -359,6 +361,8 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .st-warn{background:var(--swarn-bg);color:var(--swarn-t);}
 #cap-dashboard .st-crit{background:var(--scrit-bg);color:var(--scrit-t);}
 #cap-dashboard .lbox{text-align:center;padding:50px 20px;color:var(--muted);font-size:14px;}
+
+/* ── NAV AGRUPADA ── */
 
 /* ── COMPROMISOS MEJORADOS ── */
 #cap-dashboard .citem{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0;display:flex;flex-direction:column;overflow:hidden;}
@@ -437,15 +441,10 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .gen-area-name{font-size:16px;font-weight:600;color:var(--text);flex:1;}
 #cap-dashboard .gen-area-sub{font-size:13px;color:var(--muted);}
 #cap-dashboard .gen-area-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-#cap-dashboard .gen-pill{font-size:12px;font-weight:700;padding:4px 12px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;}
-#cap-dashboard .gen-pill-ok{background:rgba(0,145,90,0.12);color:#006B43;}
-#cap-dashboard .gen-pill-warn{background:rgba(179,116,0,0.12);color:#8A5700;}
-#cap-dashboard .gen-pill-crit{background:rgba(201,64,42,0.12);color:#C9402A;}
 #cap-dashboard .gen-cap{font-size:13px;font-weight:700;color:var(--muted);}
 #cap-dashboard .gen-bar{width:80px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
 #cap-dashboard .gen-bar-fill{height:100%;border-radius:3px;}
 @media(max-width:900px){#cap-dashboard .gen-grid{grid-template-columns:1fr;}}
-@media(max-width:900px){#cap-dashboard .area-body{grid-template-columns:1fr;}#cap-dashboard .at-header,#cap-dashboard .alert-row{grid-template-columns:32px 1fr 70px;}#cap-dashboard .at-header div:nth-child(4),#cap-dashboard .at-header div:nth-child(5),#cap-dashboard .alert-row .ar-plan,#cap-dashboard .alert-row .ar-resp{display:none;}}
 @media(max-width:600px){#cap-dashboard .h-content,#cap-dashboard .tabs,#cap-dashboard main{padding-left:14px;padding-right:14px;}}
 </style>
 <div id="cap-dashboard">
@@ -476,10 +475,9 @@ HTML_TEMPLATE = r"""<style>
     <div id="general-view"><div class="lbox">Cargando…</div></div>
   </div>
   <div class="tab-panel" id="tab-cap">
-    <div class="fbar" id="fbar"><span class="fl">Área:</span></div>
-    <div class="pbar" id="pbar-cap"><span class="pl">País:</span></div>
-    <div id="area-detail"><div class="lbox">Cargando…</div></div>
-  </div>
+    <div class="fbar" id="fbar-cap"></div>
+        <div class="pbar" id="pbar-cap"><span class="pl">País:</span></div>
+        <div id="area-detail"><div class="lbox">Cargando…</div></div>
   <div class="tab-panel" id="tab-alt">
     <div class="pbar" id="pbar-alt"><span class="pl">País:</span></div>
     <div class="alist" id="alist"></div>
@@ -501,9 +499,16 @@ HTML_TEMPLATE = r"""<style>
 const DATA = __DATA_PLACEHOLDER__;
 
 let currentAreaIdx = 0;
+
+const CAP_GROUPS = [
+  { name:'Infraestructura',     icon:'INFRA', areas:['datacenter','databases','cloud','openshift','telecom'] },
+  { name:'Producción APP',      icon:'APP',   areas:['mashery','tibco','sesame','sugar','kafka','stcp','rhsso'] },
+  { name:'Operación (Delivery)',icon:'OPS',   areas:['devsecops','controltower','montools','monfit'] },
+];
 const COUNTRIES = ['Brasil','Chile','Colombia','Mexico','Peru','Latam'];
 let filterCountry = { cap:'all', alt:'all', com:'all' };
 let filterStatus  = { com:'all' };
+
 
 function buildPbar(containerId, tab, extraBtns) {
   const el = document.getElementById(containerId);
@@ -532,7 +537,9 @@ function buildSbar(containerId, tab) {
 function setCountry(tab, country) {
   filterCountry[tab] = country;
   buildPbar('pbar-' + tab, tab);
+  if (tab === 'cap') {
   if (tab === 'cap') renderAreaDetail(DATA, currentAreaIdx);
+  }
   if (tab === 'alt') renderAlerts(DATA);
   if (tab === 'com') renderCommits(DATA);
 }
@@ -560,21 +567,11 @@ function renderAll(d){
   document.getElementById('ba').textContent = d.alerts.length;
   document.getElementById('bc').textContent = d.commitments.length;
 
-  const fb = document.getElementById('fbar');
-  fb.innerHTML = '<span class="fl">\u00c1rea:</span>';
-  d.areas.forEach((a,i) => {
-    const b = document.createElement('button');
-    b.className = 'fbtn' + (i===0?' active':'');
-    b.textContent = a.name;
-    b.onclick = () => {
-      currentAreaIdx = i;
-      document.querySelectorAll('.fbtn').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      renderAreaDetail(d, i);
-    };
-    fb.appendChild(b);
-  });
 
+
+  // Init nav
+  currentAreaIdx = 0;
+  buildGroupedFbar(d);
   renderAreaDetail(d, 0);
   renderGeneral(d);
   renderAlerts(d);
@@ -647,9 +644,7 @@ function statusDotColor(s) {
 function statusBarColor(s) {
   return s === 'ok' ? '#00915A' : s === 'warn' ? '#E8A020' : '#D94F4F';
 }
-function statusPillClass(s) {
-  return s === 'ok' ? 'gen-pill gen-pill-ok' : s === 'warn' ? 'gen-pill gen-pill-warn' : 'gen-pill gen-pill-crit';
-}
+
 function statusLabel(s) {
   return s === 'ok' ? 'Estable' : s === 'warn' ? 'Atención' : 'Riesgo Alto';
 }
@@ -700,8 +695,6 @@ function renderGeneral(d) {
     groupAreas.forEach((area, i) => {
       const as = areaStatus(area);
       const dotColor = statusDotColor(as);
-      const pillClass = statusPillClass(as);
-      const pillLabel = statusLabel(as);
       const sublabel = SUBLABELS[area.id] || '';
 
       const areaIdx = d.areas.findIndex(a => a.id === area.id);
@@ -711,7 +704,7 @@ function renderGeneral(d) {
       const medAlertas    = area.alertas.filter(a => a.impacto === 'Medio').length;
       const bajaAlertas   = area.alertas.filter(a => a.impacto === 'Bajo').length;
 
-      html += `<div class="gen-area-row" onclick="sw('cap');document.querySelectorAll('.fbtn')[${areaIdx}]&&document.querySelectorAll('.fbtn')[${areaIdx}].click();">
+html += `<div class="gen-area-row" onclick="sw('cap');selectArea(${areaIdx});">
         <div class="gen-status-dot" style="background:${dotColor};box-shadow:0 0 6px ${dotColor}60;flex-shrink:0;"></div>
         <div style="flex:1;min-width:0;">
           <div class="gen-area-name">${area.name}</div>
@@ -719,14 +712,11 @@ function renderGeneral(d) {
         </div>
         <div class="gen-area-right" style="gap:6px;">
           ${totalAlertas === 0
-            ? `<span style="font-size:12px;color:#00915A;font-weight:600;">Sin alertas</span>`
-            : `<div style="display:flex;gap:5px;align-items:center;">
-                ${altasAlertas  > 0 ? `<span style="font-size:11px;font-weight:700;background:rgba(217,79,79,0.18);color:#D94F4F;padding:2px 8px;border-radius:8px;">${altasAlertas} Alto</span>` : ''}
-                ${medAlertas    > 0 ? `<span style="font-size:11px;font-weight:700;background:rgba(232,160,32,0.18);color:#E8A020;padding:2px 8px;border-radius:8px;">${medAlertas} Medio</span>` : ''}
-                ${bajaAlertas   > 0 ? `<span style="font-size:11px;font-weight:700;background:rgba(0,145,90,0.15);color:#00915A;padding:2px 8px;border-radius:8px;">${bajaAlertas} Bajo</span>` : ''}
-               </div>`
+            ? `<span style="font-size:12px;color:#006B43;font-weight:600;">Sin alertas</span>`
+            : altasAlertas > 0
+              ? `<span style="font-size:11px;font-weight:700;background:rgba(201,64,42,0.12);color:#C9402A;padding:2px 10px;border-radius:8px;">⚠ Riesgo</span>`
+              : `<span style="font-size:11px;font-weight:700;background:rgba(179,116,0,0.12);color:#8A5700;padding:2px 10px;border-radius:8px;">⚠ Alerta</span>`
           }
-          <span class="${pillClass}" style="white-space:nowrap;">${pillLabel}</span>
         </div>
       </div>`;
     });
@@ -765,52 +755,7 @@ function renderAreaDetail(d, idx) {
     : '';
 
   // Country capacity card — when filtered show big card for that country
-  let capHtml = '';
-  if (fc !== 'all' && countries.length === 1) {
-    const c = countries[0];
-    const pct = Math.round(c.available / c.total * 100);
-    const bc  = c.status==='ok'?'#00915A':c.status==='warn'?'#A3C439':'#EF7B5B';
-    const nc  = c.status==='ok'?'var(--primary)':c.status==='warn'?'#A3C439':'#EF7B5B';
-    const sl  = c.status==='ok'?'Estable':c.status==='warn'?'Atención':'Crítico';
-    const sc  = c.status==='ok'?'st-ok':c.status==='warn'?'st-warn':'st-crit';
-    capHtml = '<div class="lp-card">' +
-      '<div class="lp-section-title">Capacity — ' + c.country + ' ' + c.flag + '</div>' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
-        '<span style="font-size:13px;color:var(--muted);">Disponibles</span>' +
-        '<span class="' + sc + '" style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;">' + sl + '</span>' +
-      '</div>' +
-      '<div style="font-size:36px;font-weight:800;color:' + nc + ';line-height:1;">' + c.available +
-        '<span style="font-size:18px;color:var(--muted);font-weight:400;"> / ' + c.total + '</span>' +
-      '</div>' +
-      '<div style="background:var(--surface2);border-radius:4px;height:8px;overflow:hidden;margin:10px 0 6px;">' +
-        '<div style="width:' + pct + '%;height:100%;background:' + bc + ';border-radius:4px;"></div>' +
-      '</div>' +
-      '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">' +
-        '<span>Rol: <strong style="color:var(--text)">' + c.role + '</strong></span>' +
-        '<span>Lead: <strong style="color:var(--text)">' + c.lead + '</strong></span>' +
-      '</div>' +
-    '</div>';
-  } else {
-    // All countries — compact bars
-    capHtml = '<div class="lp-card">' +
-      '<div class="lp-section-title">Capacity por País</div>' +
-      countries.map(c => {
-        const pct = Math.round(c.available / c.total * 100);
-        const bc  = c.status==='ok'?'#00915A':c.status==='warn'?'#A3C439':'#EF7B5B';
-        const nc  = c.status==='ok'?'var(--primary)':c.status==='warn'?'#A3C439':'#EF7B5B';
-        return '<div style="margin-bottom:10px;">' +
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">' +
-            '<span style="font-size:12px;font-weight:500;">' + c.flag + ' ' + c.country + '</span>' +
-            '<span style="font-size:12px;color:' + nc + ';font-weight:700;">' + c.available +
-              '<span style="color:var(--muted);font-weight:400;">/' + c.total + '</span></span>' +
-          '</div>' +
-          '<div style="background:var(--surface2);border-radius:3px;height:4px;overflow:hidden;">' +
-            '<div style="width:' + pct + '%;height:100%;background:' + bc + ';border-radius:3px;"></div>' +
-          '</div>' +
-        '</div>';
-      }).join('') +
-    '</div>';
-  }
+  const capHtml = '';
 
   const alertasHtml = alertas.length
     ? alertas.map(al => {
@@ -879,12 +824,16 @@ function renderAreaDetail(d, idx) {
         '<div class="rp-card">' +
           '<div class="rp-header"><div class="rp-header-title">Novedades Relevantes</div></div>' +
           '<div class="rp-body">' +
-            '<div class="rp-section"><span class="rp-tag tag-green">Logros</span>' +
-              '<div class="rp-text"><ul>' + area.novedades.logros.map(l=>'<li>'+l+'</li>').join('') + '</ul></div></div>' +
-            '<div class="rp-section"><span class="rp-tag tag-gray">Proyectos / Iniciativas</span>' +
-              '<div class="rp-text"><ul>' + area.novedades.proyectos.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' +
-            '<div class="rp-section"><span class="rp-tag tag-gray">Otros</span>' +
-              '<div class="rp-text">' + area.novedades.otros.map(o=>o.replace(/\n/g,'<br>')).join('<br><br>') + '</div></div>' +
+            (area.novedades.logros.length ? '<div class="rp-section"><span class="rp-tag tag-green">✅ Logros</span>' +
+              '<div class="rp-text"><ul>' + area.novedades.logros.map(l=>'<li>'+l+'</li>').join('') + '</ul></div></div>' : '') +
+            (area.novedades.proyectos.length ? '<div class="rp-section"><span class="rp-tag" style="background:#EEF0F5;color:#3B4A6B;border:1px solid #D0D4E0;">🚀 Proyectos / Iniciativas</span>' +
+              '<div class="rp-text"><ul>' + area.novedades.proyectos.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' : '') +
+            (area.novedades.pendientes && area.novedades.pendientes.length ? '<div class="rp-section"><span class="rp-tag" style="background:#FEF6E4;color:#8A5700;border:1px solid #F5D78A;">⏳ Pendientes</span>' +
+              '<div class="rp-text"><ul>' + area.novedades.pendientes.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' : '') +
+            (area.novedades.incidentes && area.novedades.incidentes.length ? '<div class="rp-section"><span class="rp-tag" style="background:#FDECEA;color:#C9402A;border:1px solid #FBBCB5;">🚨 Incidentes</span>' +
+              '<div class="rp-text"><ul>' + area.novedades.incidentes.map(i=>'<li>'+i+'</li>').join('') + '</ul></div></div>' : '') +
+            (area.novedades.otros.length ? '<div class="rp-section"><span class="rp-tag" style="background:#F3E5F5;color:#6A1B7A;border:1px solid #D7A9E3;">📌 Otros</span>' +
+              '<div class="rp-text">' + area.novedades.otros.map(o=>o.replace(/\n/g,'<br>')).join('<br><br>') + '</div></div>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -893,10 +842,15 @@ function renderAreaDetail(d, idx) {
 }
 
 function navArea(idx){
-  currentAreaIdx=idx;
-  document.querySelectorAll('.fbtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  renderAreaDetail(DATA,idx);
-  window.scrollTo({top:0,behavior:'smooth'});
+  currentAreaIdx = idx;
+  // Find which group this area belongs to
+  const areaId = DATA.areas[idx].id;
+  CAP_GROUPS.forEach((g, gi) => {
+    if (g.areas.includes(areaId)) currentGroupIdx = gi;
+  });
+  buildCapNav(DATA);
+  renderAreaDetail(DATA, idx);
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function renderAlerts(d){
@@ -1018,6 +972,131 @@ function sw(id){
 
 
 
+
+function buildGroupedFbar(d) {
+  const el = document.getElementById('cap-nav');
+  if (!el) return;
+  const areaMap = {};
+  d.areas.forEach(a => { areaMap[a.id] = a; });
+  let html = '<div class="cap-sidebar-title">Áreas</div><div class="cap-nav-wrap">';
+  CAP_GROUPS.forEach((group, gi) => {
+    const groupAreas = group.areas.map(id => areaMap[id]).filter(Boolean);
+    const critC = groupAreas.filter(a => areaStatus(a) === 'crit').length;
+    const warnC = groupAreas.filter(a => areaStatus(a) === 'warn').length;
+    const okC   = groupAreas.filter(a => areaStatus(a) === 'ok').length;
+    const isOpen = currentGroupIdx === gi;
+    html += '<div class="cap-nav-group">';
+    html += '<div class="cap-nav-group-hdr' + (isOpen && currentAreaIdx === -1 ? ' active' : '') + '" data-gi="' + gi + '" onclick="selectGroup(this.dataset.gi)">' +
+      '<span class="cap-nav-group-icon">' + group.icon + '</span>' +
+      '<span class="cap-nav-group-name">' + group.name + '</span>' +
+      '<div class="cap-nav-group-summary">' +
+        (critC > 0 ? '<span class="cap-nav-sum-badge" style="background:rgba(201,64,42,0.12);color:#C9402A;">' + critC + ' ⚠</span>' : '') +
+        (warnC > 0 ? '<span class="cap-nav-sum-badge" style="background:rgba(179,116,0,0.12);color:#8A5700;">' + warnC + ' !</span>' : '') +
+        (okC   > 0 ? '<span class="cap-nav-sum-badge" style="background:rgba(0,145,90,0.10);color:#006B43;">' + okC + ' ✓</span>' : '') +
+      '</div>' +
+      '<span class="cap-nav-group-arrow' + (isOpen ? ' open' : '') + '">▶</span>' +
+    '</div>';
+    html += '<div class="cap-nav-subareas' + (isOpen ? ' open' : '') + '">';
+    groupAreas.forEach(area => {
+      const as = areaStatus(area);
+      const dotColor = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
+      const aIdx = d.areas.findIndex(a => a.id === area.id);
+      const isActive = currentAreaIdx === aIdx && currentGroupIdx === gi;
+      html += '<button class="cap-nav-sub' + (isActive ? ' active' : '') + '" data-aidx="' + aIdx + '" data-gi="' + gi + '" onclick="selectSubArea(this.dataset.gi,this.dataset.aidx)">' +
+        '<div class="cap-nav-sub-dot" style="background:' + dotColor + ';"></div>' + area.name + '</button>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function selectArea(aIdx) {
+  currentAreaIdx = aIdx;
+  buildGroupedFbar(DATA);
+  renderAreaDetail(DATA, aIdx);
+}
+
+function selectGroup(gi) {
+  gi = parseInt(gi);
+  if (currentGroupIdx === gi && currentAreaIdx === -1) {
+    currentGroupIdx = -1; currentAreaIdx = 0;
+    buildCapNav(DATA);
+    document.getElementById('area-detail').innerHTML = '<div class="lbox">Selecciona un área o grupo</div>';
+    return;
+  }
+  currentGroupIdx = gi; currentAreaIdx = -1;
+  buildCapNav(DATA);
+  renderGroupSummary(DATA, gi);
+}
+
+function selectSubArea(gi, aIdx) {
+  gi = parseInt(gi); aIdx = parseInt(aIdx);
+  currentGroupIdx = gi; currentAreaIdx = aIdx;
+  buildCapNav(DATA);
+  renderAreaDetail(DATA, aIdx);
+}
+
+function renderGroupSummary(d, gi) {
+  const group = CAP_GROUPS[gi];
+  const areaMap = {};
+  d.areas.forEach(a => { areaMap[a.id] = a; });
+  const groupAreas = group.areas.map(id => areaMap[id]).filter(Boolean);
+  const fc = filterCountry.cap;
+  let html = '<div>';
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">' +
+    '<span style="font-size:11px;font-weight:800;letter-spacing:1px;background:var(--primary);color:#fff;padding:3px 8px;border-radius:4px;">' + group.icon + '</span>' +
+    '<span style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--primary);">' + group.name + '</span>' +
+    '<span style="font-size:12px;color:var(--muted);margin-left:8px;">Selecciona un área para ver el detalle</span>' +
+  '</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">';
+  groupAreas.forEach(area => {
+    const as = areaStatus(area);
+    const dotColor  = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
+    const borderCol = as==='ok'?'rgba(0,145,90,0.3)':as==='warn'?'rgba(179,116,0,0.3)':'rgba(201,64,42,0.3)';
+    const aIdx = d.areas.findIndex(a => a.id === area.id);
+    const totalAlerts = area.alertas.length;
+    const altasAl = area.alertas.filter(a => a.impacto === 'Alto').length;
+    const countries = fc === 'all' ? area.countries : area.countries.filter(c => c.country === fc);
+    html += '<div style="background:var(--surface);border:1px solid ' + borderCol + ';border-left:4px solid ' + dotColor + ';border-radius:8px;overflow:hidden;cursor:pointer;" onclick="selectSubArea(' + gi + ',' + aIdx + ')">' +
+      '<div style="padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">' +
+        '<div style="width:10px;height:10px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;"></div>' +
+        '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text);flex:1;">' + area.name + '</span>' +
+        (totalAlerts === 0 ? '<span style="font-size:11px;color:#006B43;font-weight:600;">Sin alertas</span>' :
+          altasAl > 0 ? '<span style="font-size:11px;font-weight:700;background:rgba(201,64,42,0.12);color:#C9402A;padding:2px 8px;border-radius:6px;">⚠ Riesgo</span>' :
+          '<span style="font-size:11px;font-weight:700;background:rgba(179,116,0,0.12);color:#8A5700;padding:2px 8px;border-radius:6px;">⚠ Alerta</span>') +
+      '</div>' +
+      '<div style="display:flex;gap:0;border-bottom:1px solid var(--border);">' +
+        area.kpis.map((k, ki) =>
+          '<div style="flex:1;text-align:center;padding:7px 4px;' + (ki < area.kpis.length-1 ? 'border-right:1px solid var(--border);' : '') + '">' +
+            '<div style="font-size:16px;font-weight:700;color:var(--text);font-family:Barlow Condensed,sans-serif;">' + k.v + '</div>' +
+            '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">' + k.n + '</div>' +
+          '</div>').join('') +
+        '<div style="flex:1;text-align:center;padding:7px 4px;">' +
+          '<div style="font-size:16px;font-weight:700;color:var(--primary);font-family:Barlow Condensed,sans-serif;">' + area.kpis.reduce((s,k)=>s+k.v,0) + '</div>' +
+          '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Total</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="padding:8px 14px;">' +
+        countries.slice(0,4).map(c => {
+          const bc = c.status==='ok'?'#00915A':c.status==='warn'?'#E8A020':'#C9402A';
+          const pct = Math.round(c.available/c.total*100);
+          return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
+            '<span style="font-size:11px;min-width:20px;">' + c.flag + '</span>' +
+            '<span style="font-size:11px;color:var(--text);flex:1;">' + c.country + '</span>' +
+            '<div style="width:50px;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;">' +
+              '<div style="width:' + pct + '%;height:100%;background:' + bc + ';border-radius:2px;"></div>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+        (countries.length > 4 ? '<div style="font-size:11px;color:var(--muted);margin-top:2px;">+' + (countries.length-4) + ' más...</div>' : '') +
+      '</div>' +
+      '<div style="padding:5px 14px;background:var(--surface2);font-size:11px;color:var(--muted);text-align:right;">Ver detalle completo →</div>' +
+    '</div>';
+  });
+  html += '</div></div>';
+  document.getElementById('area-detail').innerHTML = html;
+}
 
 renderAll(DATA);
 </script>
