@@ -202,7 +202,7 @@ for _, br in df_bita.iterrows():
 commitments = []
 for _, co in df_comp.iterrows():
     if not safe(co.iloc[0]): continue
-    try:    avance = int(float(str(co.iloc[6]).strip())) if co.iloc[6] is not None and str(co.iloc[6]).strip() not in ('','nan') else 0
+    try:    avance = int(float(str(co.iloc[7]).strip())) if co.iloc[7] is not None and str(co.iloc[7]).strip() not in ('','nan') else 0
     except: avance = 0
     commitments.append({
         "title":  safe(co.iloc[0]) or "",
@@ -210,9 +210,10 @@ for _, co in df_comp.iterrows():
         "status": safe(co.iloc[2]) or "pend",
         "label":  safe(co.iloc[3]) or "Pendiente",
         "due":    safe(co.iloc[4]) or "",
-        "owner":  safe(co.iloc[5]) or "",
+        "eta":    safe(co.iloc[5]) or "",
+        "owner":  safe(co.iloc[6]) or "",
         "avance": avance,
-        "hitos":  safe(co.iloc[7]) or "",
+        "hitos":  safe(co.iloc[8]) or "",
         "bitacora": bitacora.get(len(commitments)+1, []),
     })
 
@@ -230,25 +231,24 @@ print(f"   ✓ {len(areas)} áreas  |  {sum(len(a['countries']) for a in areas)}
 # ════════════════════════════════════════════════════════
 HTML_TEMPLATE = r"""<style>
 
-/* ── Tema claro ── */
+/* ── Tema oscuro (defecto) ── */
 #cap-dashboard {
   --bg:      #F5F6FA; --surface:  #FFFFFF; --surface2: #EEF0F5;
   --surface3:#E4E6EE; --border:   #D0D4E0; --border2:  #B8BDCC;
   --text:    #1A1F36; --muted:    #5E6780; --subtle:   #9099B2;
-  --primary: #00915A; --pdark:    #006B43; --pglow:    rgba(0,145,90,0.10);
-  --coral:   #C9402A; --amber:    #B37400; --sky:      #0060A8;
-  --stok-bg: rgba(0,145,90,0.12);  --stok-t:  #006B43;
-  --swarn-bg:rgba(179,116,0,0.12); --swarn-t: #8A5700;
-  --scrit-bg:rgba(201,64,42,0.10); --scrit-t: #C9402A;
+  --primary: #00915A; --pdark:    #006B43; --pglow:    rgba(0,145,90,0.14);
+  --coral:   #EF7B5B; --amber:    #E8A020; --sky:      #56B4C0;
+  --stok-bg: rgba(0,145,90,0.18);  --stok-t:  #00915A;
+  --swarn-bg:rgba(163,196,57,0.18);--swarn-t: #8aaa2e;
+  --scrit-bg:rgba(239,123,91,0.2); --scrit-t: #EF7B5B;
 }
-
 
 /* ── Tema claro — Confluence en modo claro ── */
 #cap-dashboard header{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;}
 #cap-dashboard .h-accent{width:5px;flex-shrink:0;background:linear-gradient(180deg,#595959 0%,var(--primary) 100%);}
 #cap-dashboard .h-content{flex:1;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;flex-wrap:wrap;gap:10px;}
 #cap-dashboard .h-left{display:flex;align-items:center;gap:14px;}
-#cap-dashboard .h-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1;color:var(--text);}
+#cap-dashboard .h-title{font-family:Arial Narrow,Arial,sans-serif;font-size:26px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1;color:var(--text);}
 #cap-dashboard .h-sub{font-size:12px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
 #cap-dashboard .h-badge{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;}
 #cap-dashboard .live{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:blink 2s infinite;}
@@ -256,7 +256,7 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .tabs{display:flex;gap:2px;padding:12px 32px 0;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
 #cap-dashboard .tbtn{font-family:'Inter',sans-serif;font-size:14px;font-weight:500;color:var(--muted);background:transparent;border:none;cursor:pointer;padding:7px 14px;border-radius:5px 5px 0 0;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
 #cap-dashboard .tbtn:hover{color:var(--text);background:rgba(128,128,128,0.08);}
-#cap-dashboard .tbtn.active{color:var(--primary);border-bottom-color:var(--primary);background:rgba(0,145,90,0.08);}
+#cap-dashboard .tbtn.active{color:var(--primary);border-bottom-color:var(--primary);background:var(--pglow);}
 #cap-dashboard .tbadge{display:inline-block;font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px;margin-left:4px;vertical-align:middle;}
 #cap-dashboard .tbr{background:rgba(239,123,91,.22);color:var(--coral);}
 #cap-dashboard .tbg{background:var(--stok-bg);color:var(--primary);}
@@ -264,13 +264,29 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .tab-panel{display:none;}
 #cap-dashboard .tab-panel.active{display:block;animation:fu .2s ease;}
 @keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-#cap-dashboard .fbar{display:flex;align-items:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+#cap-dashboard .fbar{display:flex;flex-direction:column;gap:0;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+#cap-dashboard .fbar-group{border-bottom:1px solid var(--border);}
+#cap-dashboard .fbar-group:last-child{border-bottom:none;}
+#cap-dashboard .fbar-group-header{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;user-select:none;transition:background .15s;}
+#cap-dashboard .fbar-group-header:hover{background:var(--surface2);}
+#cap-dashboard .fbar-group-header.open{background:rgba(0,145,90,0.06);border-bottom:1px solid var(--border);}
+#cap-dashboard .fbar-group-icon{font-size:10px;font-weight:800;letter-spacing:1px;background:var(--primary);color:#fff;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+#cap-dashboard .fbar-group-name{font-family:Arial Narrow,Arial,sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);flex:1;}
+#cap-dashboard .fbar-group-arrow{font-size:11px;color:var(--muted);transition:transform .25s;margin-left:auto;}
+#cap-dashboard .fbar-group-arrow.open{transform:rotate(90deg);}
+#cap-dashboard .fbar-group-status{display:flex;gap:4px;margin-right:6px;}
+#cap-dashboard .fbar-subareas{display:none;flex-direction:column;gap:0;background:var(--surface2);}
+#cap-dashboard .fbar-subareas.open{display:flex;}
+#cap-dashboard .fbtn{font-size:13px;font-weight:500;background:transparent;color:var(--muted);border:none;border-bottom:1px solid var(--border);padding:9px 16px 9px 32px;cursor:pointer;transition:all .14s;white-space:nowrap;font-family:'Inter',sans-serif;text-align:left;display:flex;align-items:center;gap:8px;width:100%;}
+#cap-dashboard .fbtn:last-child{border-bottom:none;}
+#cap-dashboard .fbtn:hover{background:rgba(0,145,90,0.06);color:var(--text);}
+#cap-dashboard .fbtn.active{background:rgba(0,145,90,0.10);color:var(--primary);font-weight:700;border-left:3px solid var(--primary);}
 #cap-dashboard .fl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-right:2px;}
 #cap-dashboard .fbtn{font-size:13px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:14px;padding:5px 14px;cursor:pointer;transition:all .14s;white-space:nowrap;font-family:'Inter',sans-serif;}
 #cap-dashboard .fbtn:hover{color:var(--text);border-color:var(--primary);}
 #cap-dashboard .fbtn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 #cap-dashboard .area-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
-#cap-dashboard .area-nav-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--primary);}
+#cap-dashboard .area-nav-title{font-family:Arial Narrow,Arial,sans-serif;font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--primary);}
 #cap-dashboard .nav-arrow{font-size:11px;color:var(--muted);cursor:pointer;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;transition:all .14s;font-family:'Inter',sans-serif;}
 #cap-dashboard .nav-arrow:hover{color:var(--text);border-color:var(--primary);}
 #cap-dashboard .area-body{display:grid;grid-template-columns:220px 1fr 260px;gap:12px;align-items:start;}
@@ -284,21 +300,21 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .kpi-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);}
 #cap-dashboard .kpi-row:last-child{border-bottom:none;}
 #cap-dashboard .kpi-name{font-size:13px;color:var(--muted);}
-#cap-dashboard .kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--text);}
+#cap-dashboard .kpi-val{font-family:Arial Narrow,Arial,sans-serif;font-size:22px;font-weight:700;color:var(--text);}
 #cap-dashboard .kpi-total-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;margin-top:2px;}
 #cap-dashboard .kpi-total-name{font-size:11px;font-weight:600;color:var(--text);}
-#cap-dashboard .kpi-total-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--primary);}
+#cap-dashboard .kpi-total-val{font-family:Arial Narrow,Arial,sans-serif;font-size:26px;font-weight:700;color:var(--primary);}
 #cap-dashboard .kpi-note{font-size:11px;color:var(--subtle);line-height:1.4;margin-top:8px;}
 #cap-dashboard .cov-item{display:flex;align-items:flex-start;gap:7px;margin-bottom:8px;}
 #cap-dashboard .cov-icon{width:14px;height:14px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:8px;color:#fff;}
 #cap-dashboard .cov-text{font-size:13px;color:var(--muted);line-height:1.4;}
 #cap-dashboard .panel-header{background:var(--primary);border-radius:8px 8px 0 0;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-#cap-dashboard .panel-header-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;}
+#cap-dashboard .panel-header-title{font-family:Arial Narrow,Arial,sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;}
 #cap-dashboard .impact-pills{display:flex;gap:6px;}
 #cap-dashboard .ipill{font-size:12px;font-weight:700;padding:4px 12px;border-radius:5px;}
-#cap-dashboard .ipill-alto{background:#FDECEA;color:#C9402A;border:1px solid #FBBCB5;}
-#cap-dashboard .ipill-medio{background:#FEF6E4;color:#B37400;border:1px solid #F5D78A;}
-#cap-dashboard .ipill-bajo{background:#E6F4EE;color:#006B43;border:1px solid #A3D4BC;}
+#cap-dashboard .ipill-alto{background:#fff;color:#C9402A;}
+#cap-dashboard .ipill-medio{background:#fff;color:#B37400;}
+#cap-dashboard .ipill-bajo{background:#fff;color:#006B43;}
 #cap-dashboard .alerts-table{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;}
 #cap-dashboard .at-header{display:grid;grid-template-columns:36px 1fr 80px 160px 100px;background:var(--surface2);border-bottom:1px solid var(--border);}
 #cap-dashboard .at-header div{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);padding:8px 10px;}
@@ -317,15 +333,18 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .ar-plan{padding:12px 10px;font-size:13px;color:var(--muted);line-height:1.5;}
 #cap-dashboard .ar-resp{padding:12px 10px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;}
 #cap-dashboard .resp-text{font-size:13px;color:var(--muted);}
-#cap-dashboard .quarter-badge{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;background:var(--pdark);color:#fff;padding:3px 10px;border-radius:5px;letter-spacing:1px;}
+#cap-dashboard .quarter-badge{font-family:Arial Narrow,Arial,sans-serif;font-size:14px;font-weight:700;background:var(--pdark);color:#fff;padding:3px 10px;border-radius:5px;letter-spacing:1px;}
 #cap-dashboard .right-panel{display:flex;flex-direction:column;gap:10px;}
 #cap-dashboard .rp-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
 #cap-dashboard .rp-header{background:var(--surface2);padding:9px 14px;border-bottom:1px solid var(--border);}
-#cap-dashboard .rp-header-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text);}
+#cap-dashboard .rp-header-title{font-family:Arial Narrow,Arial,sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text);}
 #cap-dashboard .rp-body{padding:12px 14px;}
 #cap-dashboard .rp-tag{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:5px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
 #cap-dashboard .tag-green{background:var(--primary);color:#fff;}
-#cap-dashboard .tag-gray{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+#cap-dashboard .tag-gray{background:var(--surface3);color:var(--muted);border:1px solid var(--border2);}
+#cap-dashboard .tag-amber{background:#FEF6E4;color:#B37400;border:1px solid #F5D78A;}
+#cap-dashboard .tag-red{background:#FDECEA;color:#C9402A;border:1px solid #FBBCB5;}
+#cap-dashboard .tag-amber{background:#FEF6E4;color:#B37400;border:1px solid #F5D78A;}
 #cap-dashboard .rp-text{font-size:13px;color:var(--muted);line-height:1.6;}
 #cap-dashboard .rp-text li{margin-left:12px;margin-top:3px;}
 #cap-dashboard .rp-section{margin-bottom:10px;}
@@ -346,8 +365,8 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .adate{font-size:11px;color:var(--subtle);margin-top:3px;}
 #cap-dashboard .clist{display:flex;flex-direction:column;gap:8px;}
 #cap-dashboard .citem{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px 15px;display:flex;gap:13px;align-items:flex-start;}
-#cap-dashboard .cnum{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--primary);flex-shrink:0;min-width:28px;}
-#cap-dashboard .cbody{flex:1;}
+#cap-dashboard .cnum{font-family:Arial Narrow,Arial,sans-serif;font-size:22px;font-weight:700;color:var(--primary);flex-shrink:0;min-width:28px;}
+#cap-dashboard .cbody{flex:1;min-width:0;}
 #cap-dashboard .ctitle2{font-size:14px;font-weight:600;margin-bottom:3px;color:var(--text);}
 #cap-dashboard .cdesc{font-size:13px;color:var(--muted);line-height:1.5;}
 #cap-dashboard .cfoot{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;}
@@ -362,13 +381,11 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .st-crit{background:var(--scrit-bg);color:var(--scrit-t);}
 #cap-dashboard .lbox{text-align:center;padding:50px 20px;color:var(--muted);font-size:14px;}
 
-/* ── NAV AGRUPADA ── */
-
 /* ── COMPROMISOS MEJORADOS ── */
-#cap-dashboard .citem{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0;display:flex;flex-direction:column;overflow:hidden;}
-#cap-dashboard .citem-header{display:flex;align-items:center;gap:14px;padding:16px 18px 12px;}
-#cap-dashboard .cnum{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--primary);flex-shrink:0;min-width:36px;}
-#cap-dashboard .cbody{flex:1;}
+#cap-dashboard .citem{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#cap-dashboard .citem-header{display:flex;align-items:flex-start;gap:14px;padding:16px 18px 12px;padding-right:160px;}
+#cap-dashboard .cnum{font-family:Arial Narrow,Arial,sans-serif;font-size:28px;font-weight:700;color:var(--primary);flex-shrink:0;min-width:36px;}
+#cap-dashboard .cbody{flex:1;min-width:0;}
 #cap-dashboard .ctitle2{font-size:16px;font-weight:700;margin-bottom:4px;color:var(--text);}
 #cap-dashboard .cdesc{font-size:13px;color:var(--muted);line-height:1.6;}
 #cap-dashboard .cfoot{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center;}
@@ -379,6 +396,11 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .cl{background:rgba(186,48,117,.18);color:#BA3075;}
 #cap-dashboard .cmeta2{font-size:12px;color:var(--muted);}
 #cap-dashboard .c-progress-wrap{padding:0 18px 14px;}
+#cap-dashboard .c-right-panel{position:absolute;top:0;right:0;bottom:0;width:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:12px 18px;border-left:1px solid var(--border);background:var(--surface2);}
+#cap-dashboard .c-due-label{font-size:11px;color:var(--muted);margin-bottom:4px;white-space:nowrap;text-align:right;width:100%;}
+#cap-dashboard .c-eta-label{font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px;white-space:nowrap;text-align:right;width:100%;}
+#cap-dashboard .c-pct-big{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;text-align:right;width:100%;}
+#cap-dashboard .c-pct-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;text-align:right;width:100%;}
 #cap-dashboard .c-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 #cap-dashboard .c-progress-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
 #cap-dashboard .c-progress-pct{font-size:16px;font-weight:700;}
@@ -412,7 +434,7 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .c-bita-toggle{font-size:12px;color:var(--primary);cursor:pointer;background:none;border:none;padding:4px 0;font-family:'Inter',sans-serif;font-weight:600;text-decoration:underline;}
 
 /* ── FILTRO PAÍS ── */
-#cap-dashboard .pbar{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+#cap-dashboard .pbar{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
 #cap-dashboard .pl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-right:4px;}
 #cap-dashboard .pbtn{font-size:12px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:14px;padding:5px 14px;cursor:pointer;transition:all .14s;white-space:nowrap;font-family:'Inter',sans-serif;}
 #cap-dashboard .pbtn:hover{color:var(--text);border-color:var(--primary);}
@@ -421,8 +443,8 @@ HTML_TEMPLATE = r"""<style>
 /* ── PLEGABLE ── */
 #cap-dashboard .citem-body{overflow:hidden;transition:max-height .35s cubic-bezier(.16,1,.3,1);max-height:0;}
 #cap-dashboard .citem-body.open{max-height:2000px;}
-#cap-dashboard .citem-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;cursor:pointer;border-top:1px solid var(--border);background:var(--surface2);transition:background .15s;border-radius:0 0 10px 10px;}
-#cap-dashboard .citem-toggle:hover{background:var(--surface3);}
+#cap-dashboard .citem-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;cursor:pointer;border-top:1px solid var(--border);background:var(--surface2);transition:background .15s;}
+#cap-dashboard .citem-toggle:hover{background:var(--border);}
 #cap-dashboard .citem-toggle-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;}
 #cap-dashboard .citem-arrow{font-size:14px;color:var(--muted);transition:transform .3s;}
 #cap-dashboard .citem-arrow.open{transform:rotate(180deg);}
@@ -431,20 +453,26 @@ HTML_TEMPLATE = r"""<style>
 #cap-dashboard .gen-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
 #cap-dashboard .gen-group{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 #cap-dashboard .gen-group-header{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
-#cap-dashboard .gen-group-icon{font-size:10px;font-weight:800;letter-spacing:1.5px;background:rgba(0,0,0,0.12);color:#fff;padding:3px 9px;border-radius:4px;flex-shrink:0;}
-#cap-dashboard .gen-group-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text);}
+#cap-dashboard .gen-group-icon{font-size:10px;font-weight:800;letter-spacing:1.5px;background:rgba(255,255,255,0.12);color:#fff;padding:3px 9px;border-radius:4px;flex-shrink:0;}
+#cap-dashboard .gen-group-title{font-family:Arial Narrow,Arial,sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text);}
 #cap-dashboard .gen-group-badge{margin-left:auto;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;}
 #cap-dashboard .gen-areas{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
 #cap-dashboard .gen-area-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent;}
-#cap-dashboard .gen-area-row:hover{background:var(--surface2);border-color:var(--primary);}
+#cap-dashboard .gen-area-row:hover{background:var(--surface2);border-color:var(--border);}
+#cap-dashboard .group-area-card:hover{background:var(--surface2)!important;}
 #cap-dashboard .gen-status-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;}
 #cap-dashboard .gen-area-name{font-size:16px;font-weight:600;color:var(--text);flex:1;}
 #cap-dashboard .gen-area-sub{font-size:13px;color:var(--muted);}
 #cap-dashboard .gen-area-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#cap-dashboard .gen-pill{font-size:12px;font-weight:700;padding:4px 12px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;}
+#cap-dashboard .gen-pill-ok{background:rgba(0,145,90,0.18);color:#00915A;}
+#cap-dashboard .gen-pill-warn{background:rgba(232,160,32,0.20);color:#E8A020;}
+#cap-dashboard .gen-pill-crit{background:rgba(217,79,79,0.18);color:#D94F4F;}
 #cap-dashboard .gen-cap{font-size:13px;font-weight:700;color:var(--muted);}
 #cap-dashboard .gen-bar{width:80px;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
 #cap-dashboard .gen-bar-fill{height:100%;border-radius:3px;}
 @media(max-width:900px){#cap-dashboard .gen-grid{grid-template-columns:1fr;}}
+@media(max-width:900px){#cap-dashboard .area-body{grid-template-columns:1fr;}#cap-dashboard .at-header,#cap-dashboard .alert-row{grid-template-columns:32px 1fr 70px;}#cap-dashboard .at-header div:nth-child(4),#cap-dashboard .at-header div:nth-child(5),#cap-dashboard .alert-row .ar-plan,#cap-dashboard .alert-row .ar-resp{display:none;}}
 @media(max-width:600px){#cap-dashboard .h-content,#cap-dashboard .tabs,#cap-dashboard main{padding-left:14px;padding-right:14px;}}
 </style>
 <div id="cap-dashboard">
@@ -475,9 +503,10 @@ HTML_TEMPLATE = r"""<style>
     <div id="general-view"><div class="lbox">Cargando…</div></div>
   </div>
   <div class="tab-panel" id="tab-cap">
-    <div class="fbar" id="fbar-cap"></div>
-        <div class="pbar" id="pbar-cap"><span class="pl">País:</span></div>
-        <div id="area-detail"><div class="lbox">Cargando…</div></div>
+    <div class="fbar" id="fbar"><span class="fl">Área:</span></div>
+    <div class="pbar" id="pbar-cap"><span class="pl">País:</span></div>
+    <div id="area-detail"><div class="lbox">Cargando…</div></div>
+  </div>
   <div class="tab-panel" id="tab-alt">
     <div class="pbar" id="pbar-alt"><span class="pl">País:</span></div>
     <div class="alist" id="alist"></div>
@@ -498,17 +527,10 @@ HTML_TEMPLATE = r"""<style>
 })();
 const DATA = __DATA_PLACEHOLDER__;
 
-let currentAreaIdx = 0;
-
-const CAP_GROUPS = [
-  { name:'Infraestructura',     icon:'INFRA', areas:['datacenter','databases','cloud','openshift','telecom'] },
-  { name:'Producción APP',      icon:'APP',   areas:['mashery','tibco','sesame','sugar','kafka','stcp','rhsso'] },
-  { name:'Operación (Delivery)',icon:'OPS',   areas:['devsecops','controltower','montools','monfit'] },
-];
+let currentAreaIdx = -1;
 const COUNTRIES = ['Brasil','Chile','Colombia','Mexico','Peru','Latam'];
 let filterCountry = { cap:'all', alt:'all', com:'all' };
 let filterStatus  = { com:'all' };
-
 
 function buildPbar(containerId, tab, extraBtns) {
   const el = document.getElementById(containerId);
@@ -537,9 +559,7 @@ function buildSbar(containerId, tab) {
 function setCountry(tab, country) {
   filterCountry[tab] = country;
   buildPbar('pbar-' + tab, tab);
-  if (tab === 'cap') {
   if (tab === 'cap') renderAreaDetail(DATA, currentAreaIdx);
-  }
   if (tab === 'alt') renderAlerts(DATA);
   if (tab === 'com') renderCommits(DATA);
 }
@@ -558,21 +578,163 @@ function toggleCommit(idx) {
   if (arrow) arrow.classList.toggle('open');
 }
 
+/* ── Grouped fbar CSS ── */
+
+var _openGroup = 0; // which group is expanded by default
+
+function buildGroupedFbar(d) {
+  const fb = document.getElementById('fbar');
+  if (!fb) return;
+  const areaMap = {};
+  d.areas.forEach(a => { areaMap[a.id] = a; });
+
+  // Find which group contains the active area
+  let activeGroup = _openGroup >= 0 ? _openGroup : 0;
+  if (currentAreaIdx >= 0) {
+    GROUPS.forEach((group, gi) => {
+      group.areas.forEach(aid => {
+        const idx = d.areas.findIndex(a => a.id === aid);
+        if (idx === currentAreaIdx) activeGroup = gi;
+      });
+    });
+  }
+  _openGroup = activeGroup;
+
+  let html = '';
+  GROUPS.forEach((group, gi) => {
+    const isOpen = gi === _openGroup;
+
+    // Count statuses for this group
+    const groupStatuses = group.areas.map(aid => {
+      const a = areaMap[aid]; return a ? areaStatus(a) : 'ok';
+    });
+    const hasCrit = groupStatuses.includes('crit');
+    const hasWarn = groupStatuses.includes('warn');
+    const dotColor = hasCrit ? '#C9402A' : hasWarn ? '#E8A020' : '#00915A';
+
+    html += '<div class="fbar-group">'
+          + '<div class="fbar-group-header' + (isOpen?' open':'') + '">'
+          + '<span class="fbar-group-icon" onclick="toggleGroup(' + gi + ')" style="cursor:pointer;">' + group.icon + '</span>'
+          + '<span class="fbar-group-name" onclick="selectGroup(' + gi + ')" style="cursor:pointer;flex:1;' + (currentAreaIdx===-1 && gi===_openGroup ? 'color:var(--primary);' : '') + '">' + group.name + '</span>'
+          + '<span style="width:9px;height:9px;border-radius:50%;background:' + dotColor + ';display:inline-block;flex-shrink:0;"></span>'
+          + '<span class="fbar-group-arrow' + (isOpen?' open':'') + '" onclick="toggleGroup(' + gi + ')" style="cursor:pointer;">&#9658;</span>'
+          + '</div>'
+          + '<div class="fbar-subareas' + (isOpen?' open':'') + '" id="fbar-sub-' + gi + '">';
+
+    group.areas.forEach(aid => {
+      const area = areaMap[aid];
+      if (!area) return;
+      const idx    = d.areas.findIndex(a => a.id === aid);
+      const as     = areaStatus(area);
+      const dot    = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
+      const active = currentAreaIdx === idx ? ' active' : '';
+      html += '<button class="fbtn' + active + '" onclick="selectArea(' + idx + ')">'
+            + '<span style="width:8px;height:8px;border-radius:50%;background:' + dot + ';display:inline-block;flex-shrink:0;"></span>'
+            + area.name
+            + '</button>';
+    });
+
+    html += '</div></div>';
+  });
+
+  fb.innerHTML = html;
+}
+
+function selectGroup(gi) {
+  // Show group summary in detail panel
+  currentAreaIdx = -1;
+  _openGroup = gi;
+  buildGroupedFbar(DATA);
+  renderGroupSummary(DATA, gi);
+}
+
+function renderGroupSummary(d, gi) {
+  const group    = GROUPS[gi];
+  const areaMap  = {};
+  d.areas.forEach(a => { areaMap[a.id] = a; });
+
+  let html = '<div style="margin-bottom:16px;">'
+    + '<div style="font-family:Arial Narrow,Arial,sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:4px;">'
+    + group.icon + ' ' + group.name
+    + '</div>'
+    + '<div style="font-size:12px;color:var(--muted);">Selecciona un área para ver el detalle completo</div>'
+    + '</div>';
+
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+
+  group.areas.forEach(aid => {
+    const area = areaMap[aid];
+    if (!area) return;
+    const idx  = d.areas.findIndex(a => a.id === aid);
+    const as   = areaStatus(area);
+    const dot  = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
+    const bg   = as==='ok'?'rgba(0,145,90,0.06)':as==='warn'?'rgba(232,160,32,0.06)':'rgba(201,64,42,0.06)';
+    const border = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
+    const total  = area.alertas.length;
+    const altas  = area.alertas.filter(a=>a.impacto==='Alto').length;
+    const label  = total===0?'Sin alertas':altas>0?'⚠ Riesgo':'⚠ Alerta';
+    const lcolor = total===0?'#006B43':altas>0?'#C9402A':'#8A5700';
+    const lbg    = total===0?'rgba(0,145,90,0.12)':altas>0?'rgba(201,64,42,0.12)':'rgba(179,116,0,0.12)';
+
+    html += '<div class="group-area-card" style="background:var(--surface);border:1px solid '+border+'33;border-left:4px solid '+border+';border-radius:8px;padding:14px;cursor:pointer;transition:background .15s;" '
+          + 'onclick="selectArea('+idx+')" '
+          + '>'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+          + '<span style="width:10px;height:10px;border-radius:50%;background:'+dot+';flex-shrink:0;"></span>'
+          + '<span style="font-size:14px;font-weight:700;color:var(--text);flex:1;">'+area.name+'</span>'
+          + '<span style="font-size:11px;font-weight:700;background:'+lbg+';color:'+lcolor+';padding:2px 8px;border-radius:8px;">'+label+'</span>'
+          + '</div>'
+          + '<div style="font-size:12px;color:var(--muted);">'+area.funcDesc+'</div>'
+          + (area.alertas.length > 0
+            ? '<div style="margin-top:8px;font-size:11px;color:var(--muted);">'
+              + area.alertas.slice(0,2).map(a=>'<div style="margin-top:4px;">• '+a.titulo+'</div>').join('')
+              + (area.alertas.length>2?'<div style="margin-top:4px;color:var(--subtle);">+'+( area.alertas.length-2)+' más...</div>':'')
+              + '</div>'
+            : '')
+          + '</div>';
+  });
+
+  html += '</div>';
+  document.getElementById('area-detail').innerHTML = html;
+}
+
+function toggleGroup(gi) {
+  if (_openGroup === gi) {
+    _openGroup = -1;
+  } else {
+    _openGroup = gi;
+  }
+  // Update DOM without full rebuild
+  GROUPS.forEach((g, i) => {
+    const hdr = document.querySelector('#fbar .fbar-group:nth-child(' + (i+1) + ') .fbar-group-header');
+    const sub = document.getElementById('fbar-sub-' + i);
+    const arr = document.querySelector('#fbar .fbar-group:nth-child(' + (i+1) + ') .fbar-group-arrow');
+    const isOpen = i === _openGroup;
+    if(hdr){ hdr.classList.toggle('open', isOpen); }
+    if(sub){ sub.classList.toggle('open', isOpen); }
+    if(arr){ arr.classList.toggle('open', isOpen); }
+  });
+}
+
+function selectArea(idx) {
+  currentAreaIdx = idx;
+  buildGroupedFbar(DATA);
+  renderAreaDetail(DATA, idx);
+}
+
 function renderAll(d){
   const dt = new Date(d.lastUpdate);
   document.getElementById('lupd').textContent =
-    'Actualizado: ' + dt.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'}) +
+    'Actualizado: ' + dt.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}) +
     ' · ' + dt.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
 
   document.getElementById('ba').textContent = d.alerts.length;
   document.getElementById('bc').textContent = d.commitments.length;
 
-
-
-  // Init nav
-  currentAreaIdx = 0;
   buildGroupedFbar(d);
-  renderAreaDetail(d, 0);
+
+  currentAreaIdx = -1;
+  renderGroupSummary(d, 0);
   renderGeneral(d);
   renderAlerts(d);
   renderCommits(d);
@@ -644,7 +806,9 @@ function statusDotColor(s) {
 function statusBarColor(s) {
   return s === 'ok' ? '#00915A' : s === 'warn' ? '#E8A020' : '#D94F4F';
 }
-
+function statusPillClass(s) {
+  return s === 'ok' ? 'gen-pill gen-pill-ok' : s === 'warn' ? 'gen-pill gen-pill-warn' : 'gen-pill gen-pill-crit';
+}
 function statusLabel(s) {
   return s === 'ok' ? 'Estable' : s === 'warn' ? 'Atención' : 'Riesgo Alto';
 }
@@ -695,16 +859,16 @@ function renderGeneral(d) {
     groupAreas.forEach((area, i) => {
       const as = areaStatus(area);
       const dotColor = statusDotColor(as);
+      const pillClass = statusPillClass(as);
+      const pillLabel = statusLabel(as);
       const sublabel = SUBLABELS[area.id] || '';
 
       const areaIdx = d.areas.findIndex(a => a.id === area.id);
 
-      const totalAlertas = area.alertas.length;
+      const totalAlertas  = area.alertas.length;
       const altasAlertas  = area.alertas.filter(a => a.impacto === 'Alto').length;
-      const medAlertas    = area.alertas.filter(a => a.impacto === 'Medio').length;
-      const bajaAlertas   = area.alertas.filter(a => a.impacto === 'Bajo').length;
 
-html += `<div class="gen-area-row" onclick="sw('cap');selectArea(${areaIdx});">
+      html += `<div class="gen-area-row" onclick="sw('cap');selectArea(${areaIdx});">
         <div class="gen-status-dot" style="background:${dotColor};box-shadow:0 0 6px ${dotColor}60;flex-shrink:0;"></div>
         <div style="flex:1;min-width:0;">
           <div class="gen-area-name">${area.name}</div>
@@ -712,10 +876,10 @@ html += `<div class="gen-area-row" onclick="sw('cap');selectArea(${areaIdx});">
         </div>
         <div class="gen-area-right" style="gap:6px;">
           ${totalAlertas === 0
-            ? `<span style="font-size:12px;color:#006B43;font-weight:600;">Sin alertas</span>`
+            ? `<span style="font-size:12px;color:#006B43;font-weight:700;background:rgba(0,145,90,0.12);padding:3px 12px;border-radius:10px;">Sin alertas</span>`
             : altasAlertas > 0
-              ? `<span style="font-size:11px;font-weight:700;background:rgba(201,64,42,0.12);color:#C9402A;padding:2px 10px;border-radius:8px;">⚠ Riesgo</span>`
-              : `<span style="font-size:11px;font-weight:700;background:rgba(179,116,0,0.12);color:#8A5700;padding:2px 10px;border-radius:8px;">⚠ Alerta</span>`
+              ? `<span style="font-size:12px;font-weight:700;background:rgba(217,79,79,0.15);color:#C9402A;padding:3px 12px;border-radius:10px;">&#9888; Riesgo</span>`
+              : `<span style="font-size:12px;font-weight:700;background:rgba(179,116,0,0.12);color:#8A5700;padding:3px 12px;border-radius:10px;">&#9888; Alerta</span>`
           }
         </div>
       </div>`;
@@ -754,7 +918,6 @@ function renderAreaDetail(d, idx) {
     ? '<span style="background:rgba(0,145,90,0.18);color:#00915A;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin-left:10px;">📍 ' + fc + '</span>'
     : '';
 
-  // Country capacity card — when filtered show big card for that country
   const capHtml = '';
 
   const alertasHtml = alertas.length
@@ -824,16 +987,11 @@ function renderAreaDetail(d, idx) {
         '<div class="rp-card">' +
           '<div class="rp-header"><div class="rp-header-title">Novedades Relevantes</div></div>' +
           '<div class="rp-body">' +
-            (area.novedades.logros.length ? '<div class="rp-section"><span class="rp-tag tag-green">✅ Logros</span>' +
-              '<div class="rp-text"><ul>' + area.novedades.logros.map(l=>'<li>'+l+'</li>').join('') + '</ul></div></div>' : '') +
-            (area.novedades.proyectos.length ? '<div class="rp-section"><span class="rp-tag" style="background:#EEF0F5;color:#3B4A6B;border:1px solid #D0D4E0;">🚀 Proyectos / Iniciativas</span>' +
-              '<div class="rp-text"><ul>' + area.novedades.proyectos.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' : '') +
-            (area.novedades.pendientes && area.novedades.pendientes.length ? '<div class="rp-section"><span class="rp-tag" style="background:#FEF6E4;color:#8A5700;border:1px solid #F5D78A;">⏳ Pendientes</span>' +
-              '<div class="rp-text"><ul>' + area.novedades.pendientes.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' : '') +
-            (area.novedades.incidentes && area.novedades.incidentes.length ? '<div class="rp-section"><span class="rp-tag" style="background:#FDECEA;color:#C9402A;border:1px solid #FBBCB5;">🚨 Incidentes</span>' +
-              '<div class="rp-text"><ul>' + area.novedades.incidentes.map(i=>'<li>'+i+'</li>').join('') + '</ul></div></div>' : '') +
-            (area.novedades.otros.length ? '<div class="rp-section"><span class="rp-tag" style="background:#F3E5F5;color:#6A1B7A;border:1px solid #D7A9E3;">📌 Otros</span>' +
-              '<div class="rp-text">' + area.novedades.otros.map(o=>o.replace(/\n/g,'<br>')).join('<br><br>') + '</div></div>' : '') +
+            (area.novedades.logros.length ? '<div class="rp-section"><span class="rp-tag tag-green">&#9989; Logros</span><div class="rp-text"><ul>' + area.novedades.logros.map(l=>'<li>'+l+'</li>').join('') + '</ul></div></div>' : '') +
+            (area.novedades.proyectos.length ? '<div class="rp-section"><span class="rp-tag tag-gray">&#128640; Proyectos / Iniciativas</span><div class="rp-text"><ul>' + area.novedades.proyectos.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' : '') +
+            ((area.novedades.pendientes && area.novedades.pendientes.length) ? '<div class="rp-section"><span class="rp-tag tag-amber">&#9203; Pendientes</span><div class="rp-text"><ul>' + area.novedades.pendientes.map(p=>'<li>'+p+'</li>').join('') + '</ul></div></div>' : '') +
+            ((area.novedades.incidentes && area.novedades.incidentes.length) ? '<div class="rp-section"><span class="rp-tag tag-red">&#128680; Incidentes</span><div class="rp-text"><ul>' + area.novedades.incidentes.map(i=>'<li>'+i+'</li>').join('') + '</ul></div></div>' : '') +
+            (area.novedades.otros.length ? '<div class="rp-section"><span class="rp-tag tag-gray">&#128204; Otros</span><div class="rp-text">' + area.novedades.otros.map(o=>o.replace(/\n/g,'<br>')).join('<br><br>') + '</div></div>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -842,15 +1000,10 @@ function renderAreaDetail(d, idx) {
 }
 
 function navArea(idx){
-  currentAreaIdx = idx;
-  // Find which group this area belongs to
-  const areaId = DATA.areas[idx].id;
-  CAP_GROUPS.forEach((g, gi) => {
-    if (g.areas.includes(areaId)) currentGroupIdx = gi;
-  });
-  buildCapNav(DATA);
-  renderAreaDetail(DATA, idx);
-  window.scrollTo({top:0, behavior:'smooth'});
+  currentAreaIdx=idx;
+  buildGroupedFbar(DATA);
+  renderAreaDetail(DATA,idx);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function renderAlerts(d){
@@ -933,17 +1086,16 @@ function renderCommits(d){
           '<div class="cfoot">' +
             '<span class="csbadge ' + bc + '">' + c.label + '</span>' +
             '<span class="cmeta2">👤 ' + c.owner + '</span>' +
-            '<span class="cmeta2">📅 ' + c.due + '</span>' +
           '</div>' +
         '</div>' +
-      '</div>' +
-      '<div class="c-progress-wrap">' +
-        '<div class="c-progress-header">' +
-          '<span class="c-progress-label">Avance</span>' +
-          '<span class="c-progress-pct" style="color:' + pctColor + ';">' + pct + '%</span>' +
-        '</div>' +
-        '<div class="c-progress-track">' +
-          '<div class="c-progress-fill" style="width:' + pct + '%;background:' + pctColor + ';"></div>' +
+        '<div class="c-right-panel">' +
+          '<div class="c-due-label">📅 ' + c.due + '</div>' +
+          (c.eta ? '<div class="c-eta-label">🏁 ETA: ' + c.eta + '</div>' : '') +
+          '<div class="c-pct-big" style="color:' + pctColor + ';">' + pct + '%</div>' +
+          '<div class="c-progress-track" style="margin-top:4px;width:100%;">' +
+            '<div class="c-progress-fill" style="width:' + pct + '%;background:' + pctColor + ';"></div>' +
+          '</div>' +
+          '<div class="c-pct-label">Avance</div>' +
         '</div>' +
       '</div>' +
       (hasDetail ? (
@@ -972,131 +1124,6 @@ function sw(id){
 
 
 
-
-function buildGroupedFbar(d) {
-  const el = document.getElementById('cap-nav');
-  if (!el) return;
-  const areaMap = {};
-  d.areas.forEach(a => { areaMap[a.id] = a; });
-  let html = '<div class="cap-sidebar-title">Áreas</div><div class="cap-nav-wrap">';
-  CAP_GROUPS.forEach((group, gi) => {
-    const groupAreas = group.areas.map(id => areaMap[id]).filter(Boolean);
-    const critC = groupAreas.filter(a => areaStatus(a) === 'crit').length;
-    const warnC = groupAreas.filter(a => areaStatus(a) === 'warn').length;
-    const okC   = groupAreas.filter(a => areaStatus(a) === 'ok').length;
-    const isOpen = currentGroupIdx === gi;
-    html += '<div class="cap-nav-group">';
-    html += '<div class="cap-nav-group-hdr' + (isOpen && currentAreaIdx === -1 ? ' active' : '') + '" data-gi="' + gi + '" onclick="selectGroup(this.dataset.gi)">' +
-      '<span class="cap-nav-group-icon">' + group.icon + '</span>' +
-      '<span class="cap-nav-group-name">' + group.name + '</span>' +
-      '<div class="cap-nav-group-summary">' +
-        (critC > 0 ? '<span class="cap-nav-sum-badge" style="background:rgba(201,64,42,0.12);color:#C9402A;">' + critC + ' ⚠</span>' : '') +
-        (warnC > 0 ? '<span class="cap-nav-sum-badge" style="background:rgba(179,116,0,0.12);color:#8A5700;">' + warnC + ' !</span>' : '') +
-        (okC   > 0 ? '<span class="cap-nav-sum-badge" style="background:rgba(0,145,90,0.10);color:#006B43;">' + okC + ' ✓</span>' : '') +
-      '</div>' +
-      '<span class="cap-nav-group-arrow' + (isOpen ? ' open' : '') + '">▶</span>' +
-    '</div>';
-    html += '<div class="cap-nav-subareas' + (isOpen ? ' open' : '') + '">';
-    groupAreas.forEach(area => {
-      const as = areaStatus(area);
-      const dotColor = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
-      const aIdx = d.areas.findIndex(a => a.id === area.id);
-      const isActive = currentAreaIdx === aIdx && currentGroupIdx === gi;
-      html += '<button class="cap-nav-sub' + (isActive ? ' active' : '') + '" data-aidx="' + aIdx + '" data-gi="' + gi + '" onclick="selectSubArea(this.dataset.gi,this.dataset.aidx)">' +
-        '<div class="cap-nav-sub-dot" style="background:' + dotColor + ';"></div>' + area.name + '</button>';
-    });
-    html += '</div></div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function selectArea(aIdx) {
-  currentAreaIdx = aIdx;
-  buildGroupedFbar(DATA);
-  renderAreaDetail(DATA, aIdx);
-}
-
-function selectGroup(gi) {
-  gi = parseInt(gi);
-  if (currentGroupIdx === gi && currentAreaIdx === -1) {
-    currentGroupIdx = -1; currentAreaIdx = 0;
-    buildCapNav(DATA);
-    document.getElementById('area-detail').innerHTML = '<div class="lbox">Selecciona un área o grupo</div>';
-    return;
-  }
-  currentGroupIdx = gi; currentAreaIdx = -1;
-  buildCapNav(DATA);
-  renderGroupSummary(DATA, gi);
-}
-
-function selectSubArea(gi, aIdx) {
-  gi = parseInt(gi); aIdx = parseInt(aIdx);
-  currentGroupIdx = gi; currentAreaIdx = aIdx;
-  buildCapNav(DATA);
-  renderAreaDetail(DATA, aIdx);
-}
-
-function renderGroupSummary(d, gi) {
-  const group = CAP_GROUPS[gi];
-  const areaMap = {};
-  d.areas.forEach(a => { areaMap[a.id] = a; });
-  const groupAreas = group.areas.map(id => areaMap[id]).filter(Boolean);
-  const fc = filterCountry.cap;
-  let html = '<div>';
-  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">' +
-    '<span style="font-size:11px;font-weight:800;letter-spacing:1px;background:var(--primary);color:#fff;padding:3px 8px;border-radius:4px;">' + group.icon + '</span>' +
-    '<span style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--primary);">' + group.name + '</span>' +
-    '<span style="font-size:12px;color:var(--muted);margin-left:8px;">Selecciona un área para ver el detalle</span>' +
-  '</div>';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">';
-  groupAreas.forEach(area => {
-    const as = areaStatus(area);
-    const dotColor  = as==='ok'?'#00915A':as==='warn'?'#E8A020':'#C9402A';
-    const borderCol = as==='ok'?'rgba(0,145,90,0.3)':as==='warn'?'rgba(179,116,0,0.3)':'rgba(201,64,42,0.3)';
-    const aIdx = d.areas.findIndex(a => a.id === area.id);
-    const totalAlerts = area.alertas.length;
-    const altasAl = area.alertas.filter(a => a.impacto === 'Alto').length;
-    const countries = fc === 'all' ? area.countries : area.countries.filter(c => c.country === fc);
-    html += '<div style="background:var(--surface);border:1px solid ' + borderCol + ';border-left:4px solid ' + dotColor + ';border-radius:8px;overflow:hidden;cursor:pointer;" onclick="selectSubArea(' + gi + ',' + aIdx + ')">' +
-      '<div style="padding:11px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">' +
-        '<div style="width:10px;height:10px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;"></div>' +
-        '<span style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text);flex:1;">' + area.name + '</span>' +
-        (totalAlerts === 0 ? '<span style="font-size:11px;color:#006B43;font-weight:600;">Sin alertas</span>' :
-          altasAl > 0 ? '<span style="font-size:11px;font-weight:700;background:rgba(201,64,42,0.12);color:#C9402A;padding:2px 8px;border-radius:6px;">⚠ Riesgo</span>' :
-          '<span style="font-size:11px;font-weight:700;background:rgba(179,116,0,0.12);color:#8A5700;padding:2px 8px;border-radius:6px;">⚠ Alerta</span>') +
-      '</div>' +
-      '<div style="display:flex;gap:0;border-bottom:1px solid var(--border);">' +
-        area.kpis.map((k, ki) =>
-          '<div style="flex:1;text-align:center;padding:7px 4px;' + (ki < area.kpis.length-1 ? 'border-right:1px solid var(--border);' : '') + '">' +
-            '<div style="font-size:16px;font-weight:700;color:var(--text);font-family:Barlow Condensed,sans-serif;">' + k.v + '</div>' +
-            '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">' + k.n + '</div>' +
-          '</div>').join('') +
-        '<div style="flex:1;text-align:center;padding:7px 4px;">' +
-          '<div style="font-size:16px;font-weight:700;color:var(--primary);font-family:Barlow Condensed,sans-serif;">' + area.kpis.reduce((s,k)=>s+k.v,0) + '</div>' +
-          '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Total</div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="padding:8px 14px;">' +
-        countries.slice(0,4).map(c => {
-          const bc = c.status==='ok'?'#00915A':c.status==='warn'?'#E8A020':'#C9402A';
-          const pct = Math.round(c.available/c.total*100);
-          return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
-            '<span style="font-size:11px;min-width:20px;">' + c.flag + '</span>' +
-            '<span style="font-size:11px;color:var(--text);flex:1;">' + c.country + '</span>' +
-            '<div style="width:50px;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;">' +
-              '<div style="width:' + pct + '%;height:100%;background:' + bc + ';border-radius:2px;"></div>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
-        (countries.length > 4 ? '<div style="font-size:11px;color:var(--muted);margin-top:2px;">+' + (countries.length-4) + ' más...</div>' : '') +
-      '</div>' +
-      '<div style="padding:5px 14px;background:var(--surface2);font-size:11px;color:var(--muted);text-align:right;">Ver detalle completo →</div>' +
-    '</div>';
-  });
-  html += '</div></div>';
-  document.getElementById('area-detail').innerHTML = html;
-}
 
 renderAll(DATA);
 </script>
